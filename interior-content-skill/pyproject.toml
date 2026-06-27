@@ -1,0 +1,20 @@
+[project]
+name = "interior-content-skill"
+version = "0.1.0"
+description = "Claude Code thick skill for generating interior design Xiaohongshu content from collector output"
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.0",
+    "httpx[socks]>=0.27",
+    "python-dotenv>=1.0",
+    "openai>=1.0",
+    "Pillow>=10.0",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["core*", "tools*", "scripts*"]
