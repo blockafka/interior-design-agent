@@ -16,7 +16,7 @@ status: live
 吃进风格档案 + 生成的设计效果图 + 户型 query，吐出复刻对标账号语气、展示这套定制效果图亮点、帮助家装公司获客的小红书营销图文。
 
 ## 输入
-- `StyleDNA` —— 主要用 `copy` 字段（voice / keywords / sentence_pattern / hashtag_pattern）
+- `StyleDNA` —— 主要用 `copy_dna` 字段（voice / keywords / sentence_pattern / hashtag_pattern）
 - `GeneratedImages` —— 可读 image_urls
 - `UserRequest` —— 户型背景
 

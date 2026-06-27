@@ -23,10 +23,10 @@ schema 见 `core/schemas.py::GeneratedImages`。字段：
 - `image_urls`: list[str] —— 1-3 张图的 URL
 - `prompts_used`: ImagePromptBundle —— 原样回传方便溯源
 
-## 实现步骤（TODO 填实现）
-1. 调用文生图 API（待选型：奇绩本地 SD / 即梦 / DALL-E）
-2. 失败 → 重试 1 次 → 回退到 `data/samples/` 兜底图
+## 实现步骤
+1. 通过 `tools.image_gen.text_to_image` 调文生图（默认 `IMAGE_GEN_PROVIDER=openai_image`，走中转平台；设为 `mock` 返回占位图）
+2. 3 张并发生成；单张失败 → 回退占位图（`PLACEHOLDER_IMAGE_URL`），保证返回 `num_images` 张
 
 ## 联调约定
 - **上游**（prompter）：拿到 `ImagePromptBundle` 不修改
-- **下游**（copywriter）：可以读 image_urls 但通常不读图（用 StyleDNA 已足够）
+- **下游**（copywriter）：多模态读取生成的效果图（`chat_with_images`），结合 StyleDNA 写文案

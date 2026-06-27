@@ -25,7 +25,7 @@ schema 见 `core/schemas.py::ImagePromptBundle`。字段：
 - `negative_prompt`: str —— 负向 prompt
 - `aspect_ratio`: str —— 默认 `"3:4"`
 
-## 实现步骤（TODO 填实现）
+## 实现步骤
 1. 把 `StyleDNA.visual` 的 4 个维度翻译成自然语言描述
 2. 拼上户型信息（户型 / 面积 / 朝向）
 3. 套上通用模板：`photorealistic / 4K / 无人物 / 无文字 / 无 logo`

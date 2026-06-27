@@ -59,7 +59,7 @@ Use the stable script entrypoint:
 
 ```bash
 python -m scripts.run_from_collect \
-  --collect-dir examples/collect-sample/厚来设计 \
+  --collect-dir examples/collect-sample \
   --target-account-id 厚来设计 \
   --area-sqm 180 \
   --layout 四室两厅 \
