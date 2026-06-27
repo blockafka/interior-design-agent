@@ -41,7 +41,7 @@ async def run(content: CollectedContent) -> StyleDNA:
     return StyleDNA(
         target_account_id=content.target_account_id,
         visual=visual,
-        copy=copy_dna,
+        copy_dna=copy_dna,
         sample_post_ids=[p.post_id for p in samples],
     )
 

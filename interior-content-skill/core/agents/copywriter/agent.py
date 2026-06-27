@@ -133,7 +133,7 @@ def _try_compress_image(path: Path) -> tuple[str, bytes] | None:
 
 def _build_style_brief(style: StyleDNA) -> str:
     """把 StyleDNA 的视觉/文案 dict 拼成 LLM 更容易执行的人话简报。"""
-    copy = style.copy or {}
+    copy = style.copy_dna or {}
     visual = style.visual or {}
 
     voice = copy.get("voice", "治愈系温暖叙事")

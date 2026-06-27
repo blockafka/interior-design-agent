@@ -42,6 +42,6 @@ async def run(
         request_id=request_id,
         style_dna=style,
         images=images,
-        copy=copy,
+        copy_content=copy,
         generated_at=datetime.now(),
     )

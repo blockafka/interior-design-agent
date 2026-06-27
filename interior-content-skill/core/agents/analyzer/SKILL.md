@@ -60,7 +60,7 @@ schema 见 `core/schemas.py::StyleDNA`（line 53）。
    - 把 5 篇的 `body` 拼成一个上下文，调 `tools.llm.chat`
    - Prompt 让 LLM 输出 JSON：`{voice, keywords, sentence_pattern, hashtag_pattern}`
 4. **合并 + 校验**：
-   - 组装 `StyleDNA(target_account_id, visual, copy, sample_post_ids)`
+   - 组装 `StyleDNA(target_account_id, visual, copy_dna, sample_post_ids)`
    - `sample_post_ids` = 进入分析的 5 篇 post_id
    - 用 Pydantic 校验一遍 schema
 

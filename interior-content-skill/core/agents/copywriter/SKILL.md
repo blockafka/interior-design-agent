@@ -27,7 +27,7 @@ schema 见 `core/schemas.py::CopyContent`。字段：
 - `hashtags`: list[str] —— 5-8 个 hashtag
 
 ## 实现步骤
-1. 用 `StyleDNA.copy.voice` + `sentence_pattern` + `hashtag_pattern` 作为风格指令
+1. 用 `StyleDNA.copy_dna.voice` + `sentence_pattern` + `hashtag_pattern` 作为风格指令
 2. 让多模态 LLM 观察设计效果图，围绕 `UserRequest.user_notes` 的客户 query 写营销文案
 3. 输出 JSON 并解析为 `CopyContent`，失败时走兜底文案，保证主链路不断
 

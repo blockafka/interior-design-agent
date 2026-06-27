@@ -53,7 +53,7 @@ class CollectedContent(BaseModel):
 class StyleDNA(BaseModel):
     target_account_id: str
     visual: dict  # color_palette / material / composition / lighting
-    copy: dict    # voice / keywords / hashtag_pattern
+    copy_dna: dict    # voice / keywords / hashtag_pattern
     sample_post_ids: list[str]
 
 
@@ -90,5 +90,5 @@ class FinalPost(BaseModel):
     request_id: str
     style_dna: StyleDNA
     images: GeneratedImages
-    copy: CopyContent
+    copy_content: CopyContent
     generated_at: datetime

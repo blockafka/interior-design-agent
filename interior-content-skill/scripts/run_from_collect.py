@@ -76,11 +76,11 @@ def _write_json(path: Path, data: Any) -> None:
 
 def _write_xiaohongshu_post(path: Path, final: FinalPost) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    hashtags = " ".join(final.copy.hashtags)
+    hashtags = " ".join(final.copy_content.hashtags)
     images = "\n".join(f"- {url}" for url in final.images.image_urls)
     content = (
-        f"# {final.copy.title}\n\n"
-        f"{final.copy.body}\n\n"
+        f"# {final.copy_content.title}\n\n"
+        f"{final.copy_content.body}\n\n"
         f"{hashtags}\n\n"
         "## 图片\n\n"
         f"{images}\n"
@@ -100,11 +100,24 @@ async def _run(args: argparse.Namespace) -> Path:
     target_account_id = args.target_account_id or collect_dir.name
     request = _build_request(args, target_account_id)
 
+    import time
+
+    t0 = time.time()
+
+    def _tick(msg: str) -> None:
+        print(f"[{time.time() - t0:5.1f}s] {msg}", flush=True)
+
+    _tick(f"读取采集目录：{collect_dir.name}")
     content = load_collected_content(collect_dir, target_account_id=target_account_id)
+    _tick(f"analyzer 开始：多模态读 {len(content.posts)} 篇笔记（要上传图片，偏慢）…")
     style = await analyzer_run(content)
+    _tick("analyzer 完成 → prompter 开始…")
     prompts = await prompter_run(style, request)
+    _tick("prompter 完成 → generator 开始：生 3 张图（最慢，可能 1-3 分钟，请耐心）…")
     images = await generator_run(prompts)
+    _tick(f"generator 完成（{len(images.image_urls)} 张）→ copywriter 开始…")
     copy = await copywriter_run(style, images, request)
+    _tick("copywriter 完成，组装结果…")
 
     from datetime import datetime
 
@@ -112,7 +125,7 @@ async def _run(args: argparse.Namespace) -> Path:
         request_id=os.urandom(16).hex(),
         style_dna=style,
         images=images,
-        copy=copy,
+        copy_content=copy,
         generated_at=datetime.now(),
     )
 
