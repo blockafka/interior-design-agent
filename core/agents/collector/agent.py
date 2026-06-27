@@ -1,13 +1,8 @@
 """
-Agent 1 · 采集 Agent
-
-职责：根据 target_account_id，抓取该账号的 5-10 篇代表作内容（文本 + 图片 URL）。
-
-输入：UserRequest
-输出：CollectedContent
-依赖工具：tools/cloudsway.py（Smart Search + Reader）
+Agent 1 · 采集 Agent · 实现
 
 负责人：A · Agent 工程师
+契约 / 行为说明：见同目录 SKILL.md
 """
 
 from datetime import datetime
@@ -15,7 +10,7 @@ from datetime import datetime
 from core.schemas import CollectedContent, CollectedPost, UserRequest
 
 
-async def collect(request: UserRequest) -> CollectedContent:
+async def run(request: UserRequest) -> CollectedContent:
     """
     TODO 真实实现：
       1. 用 Smart Search 找该账号的 5-10 篇代表作 URL

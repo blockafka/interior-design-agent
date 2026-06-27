@@ -1,26 +1,22 @@
 """
-Agent 2 · 风格分析 Agent
+Agent 2 · 风格分析 Agent · 实现
 
-职责：从 CollectedContent 提取「风格 DNA」（StyleDNA）。
-      包括视觉风格（色调 / 材质 / 构图 / 光线）+ 文案风格（语气 / 句式 / Hashtag）。
-
-输入：CollectedContent
-输出：StyleDNA
-依赖工具：tools/llm.py（视觉模型 + 文本模型）
-
-负责人：A · Agent 工程师
+负责人：kafka
+契约 / 行为说明 / 实现思路：见同目录 SKILL.md
+对接 JSON 样例：见 examples/analyzer_input_sample.json / analyzer_output_sample.json
 """
 
 from core.schemas import CollectedContent, StyleDNA
 
 
-async def analyze(content: CollectedContent) -> StyleDNA:
+async def run(content: CollectedContent) -> StyleDNA:
     """
-    TODO 真实实现：
+    TODO（kafka 负责实现）：
       1. 视觉通道：GPT-4V / Claude Vision 分析 image_urls
       2. 文案通道：LLM 分析 body 提取语气 / 关键词 / Hashtag 模式
       3. 合并输出结构化 JSON
     """
+    # === MOCK 实现：暂时返回硬编码 DNA，让主流程能跑通 ===
     return StyleDNA(
         target_account_id=content.target_account_id,
         visual={
@@ -32,6 +28,7 @@ async def analyze(content: CollectedContent) -> StyleDNA:
         copy={
             "voice": "治愈系，温暖叙事",
             "keywords": ["居家", "温暖", "治愈", "日系"],
+            "sentence_pattern": "短句为主，emoji 点缀",
             "hashtag_pattern": ["#家装日记", "#日系装修", "#治愈系家居"],
         },
         sample_post_ids=[p.post_id for p in content.posts],

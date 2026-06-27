@@ -1,19 +1,14 @@
 """
-Agent 4 · 图片生成 Agent
-
-职责：用 ImagePromptBundle 调用文生图 API，生成 1-3 张设计效果图。
-
-输入：ImagePromptBundle
-输出：GeneratedImages
-依赖工具：tools/image_gen.py
+Agent 4 · 图片生成 Agent · 实现
 
 负责人：A · Agent 工程师
+契约 / 行为说明：见同目录 SKILL.md
 """
 
 from core.schemas import GeneratedImages, ImagePromptBundle
 
 
-async def generate(prompts: ImagePromptBundle, num_images: int = 3) -> GeneratedImages:
+async def run(prompts: ImagePromptBundle, num_images: int = 3) -> GeneratedImages:
     """
     TODO 真实实现：
       1. 调用文生图 API（待选型：奇绩本地 SD / 即梦 / DALL-E）

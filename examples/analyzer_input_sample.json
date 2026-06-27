@@ -1,0 +1,57 @@
+{
+  "_comment": "analyzer Agent 的输入样例（由上游 collector 产出）。kafka 把这个发给负责 collector 的队友，作为对接契约。",
+  "_schema": "core/schemas.py::CollectedContent",
+  "_note": "实际生产时 posts 长度 5-10，这里给 3 篇展示结构",
+
+  "target_account_id": "xhs_jingyisuo",
+  "collected_at": "2026-06-27T11:30:00Z",
+  "posts": [
+    {
+      "post_id": "651a3f8c0000000012345abc",
+      "title": "100㎡北欧奶油风，全屋无主灯",
+      "body": "刚交付的新家，全屋奶油色调，原木+亚麻的搭配真的太治愈了。无主灯设计让整个空间显得特别有层次感，下午阳光斜斜地洒进来，氛围感拉满。客厅没有沙发背景墙的繁复设计，一面奶白色乳胶漆就够了。重点说一下灯光：客厅 5 个射灯 + 2 个轨道灯 + 1 个落地灯，分场景控制。",
+      "image_urls": [
+        "https://sns-webpic-qc.xhscdn.com/202603151200/abc/livingroom_1.jpg",
+        "https://sns-webpic-qc.xhscdn.com/202603151200/abc/livingroom_2.jpg",
+        "https://sns-webpic-qc.xhscdn.com/202603151200/abc/dining_1.jpg"
+      ],
+      "metadata": {
+        "likes": 8234,
+        "comments": 156,
+        "collects": 3421,
+        "publish_time": "2026-03-15"
+      }
+    },
+    {
+      "post_id": "652b22f10000000012345def",
+      "title": "我家厨房，被改成了治愈系小日子",
+      "body": "厨房改造前后对比！原本是开发商标配，硬装很丑。重新刷了奶油白墙漆，换了原木色橱柜门板，台面用了哑光石英石。最爱的是这个藤编收纳筐，把油盐酱醋都收起来，干净又有氛围感。重点：所有把手都换成了陶瓷的，一秒治愈。",
+      "image_urls": [
+        "https://sns-webpic-qc.xhscdn.com/202604081000/def/kitchen_before.jpg",
+        "https://sns-webpic-qc.xhscdn.com/202604081000/def/kitchen_after_1.jpg",
+        "https://sns-webpic-qc.xhscdn.com/202604081000/def/kitchen_after_2.jpg"
+      ],
+      "metadata": {
+        "likes": 5612,
+        "comments": 89,
+        "collects": 2103,
+        "publish_time": "2026-04-08"
+      }
+    },
+    {
+      "post_id": "653c11d20000000012345ghi",
+      "title": "卧室飘窗改造，奶油风的尽头",
+      "body": "把飘窗做成了榻榻米 + 收纳柜，上面铺了亚麻坐垫，旁边放了一盏暖光小灯。每天下班瘫在这里看会儿书，治愈感拉满。整体配色还是延续家里的奶油+原木基调，简单不出错。",
+      "image_urls": [
+        "https://sns-webpic-qc.xhscdn.com/202605201500/ghi/bedroom_1.jpg",
+        "https://sns-webpic-qc.xhscdn.com/202605201500/ghi/bedroom_2.jpg"
+      ],
+      "metadata": {
+        "likes": 4789,
+        "comments": 67,
+        "collects": 1820,
+        "publish_time": "2026-05-20"
+      }
+    }
+  ]
+}

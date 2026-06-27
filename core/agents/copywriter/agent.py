@@ -1,20 +1,14 @@
 """
-Agent 5 · 文案 Agent
-
-职责：基于 StyleDNA + GeneratedImages + 户型信息，
-      生成符合该对标账号风格的小红书图文（标题 + 正文 + Hashtag）。
-
-输入：StyleDNA + GeneratedImages + UserRequest
-输出：CopyContent
-依赖工具：tools/llm.py
+Agent 5 · 文案 Agent · 实现
 
 负责人：A · Agent 工程师
+契约 / 行为说明：见同目录 SKILL.md
 """
 
 from core.schemas import CopyContent, GeneratedImages, StyleDNA, UserRequest
 
 
-async def write_copy(
+async def run(
     style: StyleDNA,
     images: GeneratedImages,
     request: UserRequest,

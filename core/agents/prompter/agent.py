@@ -1,19 +1,14 @@
 """
-Agent 3 · 提示词工程 Agent
-
-职责：把 StyleDNA + 户型信息反推为可用于文生图的 prompt 套件（正向 + 负向）。
-
-输入：StyleDNA + UserRequest（含 floorplan_meta）
-输出：ImagePromptBundle
-依赖工具：tools/llm.py
+Agent 3 · 提示词工程 Agent · 实现
 
 负责人：A · Agent 工程师
+契约 / 行为说明：见同目录 SKILL.md
 """
 
 from core.schemas import ImagePromptBundle, StyleDNA, UserRequest
 
 
-async def build_prompt(style: StyleDNA, request: UserRequest) -> ImagePromptBundle:
+async def run(style: StyleDNA, request: UserRequest) -> ImagePromptBundle:
     """
     TODO 真实实现：
       1. 把 StyleDNA.visual 翻译成自然语言描述

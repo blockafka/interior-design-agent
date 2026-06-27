@@ -1,0 +1,8 @@
+{
+  "_purpose": "本目录存放 Agent 之间对接用的真实 JSON 样例。kafka 把这些发给上下游队友作为对接契约。",
+  "_files": {
+    "analyzer_input_sample.json": "Agent 2 (analyzer) 的输入 = Agent 1 (collector) 的输出。负责 collector 的队友照这个 schema 产出数据。",
+    "analyzer_output_sample.json": "Agent 2 (analyzer) 的输出 = Agent 3 (prompter) 的输入。负责 prompter 的队友照这个 schema 消费数据。"
+  },
+  "_rule": "所有 JSON 必须能通过 core/schemas.py 的 Pydantic 校验。若发现样例与 schema 不一致，以 schema 为准并立刻更新样例。"
+}
