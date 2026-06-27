@@ -2,180 +2,301 @@
 
 > **AI 家装设计 Agent · Beyond Prompt: Agents in Action 黑客松 · 北京站**
 >
-> 输入对标账号 + 客户户型 → 30 秒生成可发布、可成交的小红书图文营销素材。
+> 输入对标账号 + 客户户型需求，生成一套可发布、可成交的小红书图文营销素材。
 
 ---
 
-## 项目信息
+## 项目定位
 
-| 项 | 内容 |
-|----|------|
-| 赛道 | Track C · ToB 场景 AI Agent（自定义企业痛点） |
-| 团队 | 3 人 |
-| 开发周期 | 2026/06/27 11:00 – 06/28 14:30 |
-| 架构路径 | **路径 C · B3 真 Skill 化** —— 自写 5-Agent 主架构 + 真 Skill Loader（参考 Hermes / agentskills.io） |
+这是一个面向家装 / 家居定制公司的 **AI 内容获客 Agent**。
 
-详细产品文档见上一级目录 `产品文档.md`，技术架构决策见 `技术架构思考.md`。
+它不是单纯的效果图工具，也不是泛泛的小红书文案生成器。核心闭环是：
+
+1. 读取对标账号的历史图文内容。
+2. 提取该账号的视觉风格和文案风格，形成 `StyleDNA`。
+3. 根据客户户型 / 需求生成设计效果图 prompt。
+4. 调图片生成模型产出设计效果图。
+5. 用对标账号的语气包装这套效果图，生成可发布的小红书营销文案。
+
+最终目标：帮助家装公司把“设计能力”快速转成“获客内容”。
 
 ---
 
-## 架构概览：B3 真 Skill 化
+## 当前状态
 
-每个 Agent 是一个**真正的 Skill**：自带 `SKILL.md`（元数据 + 文档）+ `agent.py`（实现）。
-启动时 `skill_loader.py` 扫描 `core/agents/*/SKILL.md`，按 `order` 排序，校验 schema 链路，注入 orchestrator。
+截至 2026-06-27，主链路已经接通 **非 collector 路径**：
 
-```
-            ┌─────────────────────┐
-            │   Web 前端           │
-            └──────────┬──────────┘
-                       │ HTTP
-            ┌──────────▼──────────┐
-            │   FastAPI 后端       │
-            │   + 主编排器          │
-            │   ← skill_loader     │ ← 扫描 core/agents/*/SKILL.md
-            └──────────┬──────────┘
-                       │
-      ┌────────┬───────┼───────┬────────┐
-      ▼        ▼       ▼       ▼        ▼
-   [采集]   [风格分析] [提示词] [图片]   [文案]
-   Skill1   Skill2    Skill3   Skill4   Skill5
-   每个 Skill = SKILL.md + agent.py + (可选) references/
-      │        │       │       │        │
-      ▼        ▼       ▼       ▼        ▼
-   ┌─────────────────────────────────────┐
-   │  工具层（Cloudsway / LLM / 文生图）  │
-   └─────────────────────────────────────┘
+```text
+本地采集文件夹
+  → Analyzer Agent
+  → Prompter Agent
+  → Generator Agent
+  → Copywriter Agent
+  → FinalPost
 ```
 
-**数据流**：`UserRequest → CollectedContent → StyleDNA → ImagePromptBundle → GeneratedImages → CopyContent → FinalPost`
+已完成：
 
-所有数据结构定义在 `core/schemas.py`，**唯一真理源**。
+- Step 2 `analyzer`：真实多模态 LLM 分析，输出 `StyleDNA`。
+- Step 3 `prompter`：根据 `StyleDNA + UserRequest` 生成图片 prompt。
+- Step 4 `generator`：支持真实图片生成配置，当前使用 `openai_image` provider。
+- Step 5 `copywriter`：真实多模态 LLM 文案生成，读取生成效果图并产出小红书营销内容。
+- Collector 旁路：采集 Agent 未接入时，可用 `data/collect/<账号>` 文件夹模拟 collector 最终输出。
+
+暂未完成：
+
+- Step 1 `collector` 真实采集 Agent。
+- `skill_loader.py` 动态加载替换硬编码 orchestrator。
+- 前端 / 公网部署。
+
+---
+
+## Agent 数据流
+
+```text
+UserRequest
+  ↓
+CollectedContent
+  ↓ analyzer
+StyleDNA
+  ↓ prompter
+ImagePromptBundle
+  ↓ generator
+GeneratedImages
+  ↓ copywriter
+CopyContent
+  ↓ orchestrator
+FinalPost
+```
+
+所有数据结构定义在 `core/schemas.py`，这是唯一数据契约源。
 
 ---
 
 ## 目录结构
 
-```
+```text
 interior-design-agent/
-├── core/                              # 主架构
-│   ├── schemas.py                     # 【接口契约】Pydantic 数据结构
-│   ├── orchestrator.py                # 主编排器（5 Agent 状态机，过渡期硬编码）
-│   ├── skill_loader.py                # 【待实现】Skill 动态加载器
-│   └── agents/                        # 5 个 Skill
-│       ├── collector/                 # Step 1 · 采集
-│       │   ├── SKILL.md               # 元数据 + 文档
-│       │   └── agent.py               # 实现（async def run）
-│       ├── analyzer/                  # Step 2 · 风格分析（kafka 负责）
-│       │   ├── SKILL.md               # ★ 详细版
-│       │   └── agent.py
-│       ├── prompter/                  # Step 3 · 提示词工程
-│       ├── generator/                 # Step 4 · 图片生成
-│       └── copywriter/                # Step 5 · 文案
-├── tools/                             # 工具层
-│   ├── cloudsway.py                   # Cloudsway 三件套
-│   ├── llm.py                         # LLM 统一 client
-│   └── image_gen.py                   # 文生图 API
-├── server/main.py                     # FastAPI 后端
-├── apps/web/                          # 前端（待选型）
-├── tests/smoke_test.py                # 端到端 mock 冒烟测试
-├── examples/                          # ★ Agent 对接 JSON 样例
-│   ├── analyzer_input_sample.json     # collector → analyzer 契约
-│   └── analyzer_output_sample.json    # analyzer → prompter 契约
+├── core/
+│   ├── schemas.py                    # Pydantic 数据契约
+│   ├── orchestrator.py               # 5 Agent 主编排器；当前支持 collect_dir 旁路
+│   ├── collect_loader.py             # 本地 collector 输出文件夹 → CollectedContent
+│   └── agents/
+│       ├── collector/                # Step 1 · 采集；当前未真实接入
+│       ├── analyzer/                 # Step 2 · 风格分析
+│       ├── prompter/                 # Step 3 · 提示词工程
+│       ├── generator/                # Step 4 · 图片生成
+│       └── copywriter/               # Step 5 · 小红书营销文案
+├── tools/
+│   ├── llm.py                        # OpenAI-compatible LLM / vision client
+│   └── image_gen.py                  # 图片生成 provider 封装
+├── data/
+│   └── collect/厚来设计/             # collector 输出示例，可用于非采集链路联调
+├── tests/
+│   ├── smoke_from_collect.py         # 主编排器非 collector 链路冒烟测试
+│   ├── test_pipeline_from_collect.py # 分步骤查看各 Agent 输出
+│   ├── test_analyzer_live.py         # analyzer 真实 LLM 测试
+│   └── test_copywriter_live.py       # copywriter 真实 LLM 测试
 ├── docs/
-│   └── SKILL_PROTOCOL.md              # Skill 协议（loader 实现者必读）
-├── pyproject.toml / Makefile / .env.example
-└── README.md
+│   ├── SKILL_PROTOCOL.md
+│   ├── analyzer_dev_plan.md
+│   └── copywriter_dev_plan.md
+└── pyproject.toml
 ```
 
 ---
 
-## 团队分工（已拍板）
+## 环境配置
 
-| 角色 | 负责 Skill / 模块 | 关键交付 |
-|------|------------------|---------|
-| **kafka** | `core/agents/analyzer/` | 风格 DNA 提取（视觉 + 文案双通道） |
-| **队友 X** | `core/skill_loader.py` + `core/orchestrator.py` 改造 + 其他 4 个 Skill 编排 | Skill Loader 实现 + 主链路串联 |
-| **队友 Y** | `server/` + 部署 + `apps/web/` + Demo | 后端联调 + 前端 + 演示 |
-
-> **关键约束**：
-> - 每人只动自己目录里的文件
-> - 改 `core/schemas.py` 必须群内通知
-> - 改 SKILL.md 的 frontmatter 必须群内通知（影响 loader）
-
----
-
-## kafka 负责的 Skill：analyzer（风格分析）
-
-- **目录**：`core/agents/analyzer/`
-- **SKILL.md**：`core/agents/analyzer/SKILL.md` —— 完整契约 + 实现思路 + Prompt 草稿
-- **输入样例**：`examples/analyzer_input_sample.json`（拷给上游 collector 队友看）
-- **输出样例**：`examples/analyzer_output_sample.json`（拷给下游 prompter 队友看）
-
----
-
-## 5 条防集成铁律
-
-1. **接口契约先行** —— `core/schemas.py` 是【唯一】真理源。改 schema 必须先群里说
-2. **统一骨架** —— 本仓库就是这个骨架。所有人 clone 后只往里填，不重起结构
-3. **Mock 优先** —— 每个 Agent 都先返回 mock，保证主流程能跑通
-4. **每 2 小时强制集成** —— 整点 `git pull --rebase` + 跑 `make smoke`
-5. **共享开发环境** —— 奇绩服务器 / Docker / Codespaces 三选一
-
----
-
-## 快速开始
+复制并填写环境变量：
 
 ```bash
-# 1. 克隆
-git clone git@github.com:blockafka/interior-design-agent.git
-cd interior-design-agent
-
-# 2. 安装依赖
-make install
-
-# 3. 配置环境变量
-cp .env.example .env  # 编辑填入 API keys
-
-# 4. 跑通端到端 Mock（验证骨架完整）
-make smoke
-
-# 5. 启动后端开发服务器
-make dev  # 访问 http://localhost:8000/docs
+cp .env.example .env
 ```
+
+关键配置：
+
+```env
+OPENAI_API_KEY=...
+OPENAI_BASE_URL=https://api.openai-next.com/v1
+
+IMAGE_GEN_PROVIDER=openai_image
+IMAGE_GEN_MODEL=gemini-3.1-flash-image-preview
+```
+
+说明：
+
+- `OPENAI_API_KEY` 用于 LLM 和图片生成的 OpenAI-compatible 接口。
+- `.env` 已被 `.gitignore` 忽略，不要提交。
+- `data/generated/` 是运行时生成图片目录，也不要提交。
 
 ---
 
-## Git 工作流
+## 安装依赖
 
 ```bash
-git pull --rebase origin main
-# ... 改你负责目录里的文件 ...
-git add <你负责的文件>
-git commit -m "feat(analyzer): <做了什么>"
-git push origin main
+python -m pip install -e '.[dev]'
 ```
 
-**Commit 前缀**：`feat:` 新功能 · `fix:` 修 bug · `refactor:` 重构 · `docs:` 文档
+运行时依赖里包含：
+
+- `openai>=1.0`
+- `httpx[socks]>=0.27`
+- `Pillow>=10.0`
+
+`httpx[socks]` 是为了兼容本地 SOCKS 代理环境；`Pillow` 用于本地图片压缩和 data URI 生成。
 
 ---
 
-## 关键文档
+## 如何测试
 
-| 文档 | 用途 |
-|------|------|
-| `core/schemas.py` | 所有数据契约的唯一真理源 |
-| `core/agents/*/SKILL.md` | 每个 Skill 的元数据 + 实现指令 |
-| `docs/SKILL_PROTOCOL.md` | Skill Loader 实现者必读 |
-| `examples/*.json` | Agent 对接 JSON 样例 |
+### 1. 跑非 collector 主链路
+
+```bash
+python -m tests.smoke_from_collect
+```
+
+这个命令会读取：
+
+```text
+data/collect/厚来设计
+```
+
+然后跳过真实 collector，直接跑：
+
+```text
+collect_loader → analyzer → prompter → generator → copywriter
+```
+
+输出会包含：
+
+- request id
+- target account
+- 最终标题
+- hashtags
+- 生成图片路径
+- generated_at
+
+### 2. 查看每一步 Agent 输出
+
+```bash
+python -m tests.test_pipeline_from_collect
+```
+
+用于调试每个 Agent 的中间结果：
+
+- `CollectedContent`
+- `StyleDNA`
+- `ImagePromptBundle`
+- `GeneratedImages`
+- `CopyContent`
+
+### 3. 单测 analyzer
+
+```bash
+python -m tests.test_analyzer_live
+```
+
+可通过环境变量切换测试风格：
+
+```bash
+TEST_STYLE=新中式 python -m tests.test_analyzer_live
+TEST_STYLE=日式原木 python -m tests.test_analyzer_live
+TEST_STYLE=极简自然风 python -m tests.test_analyzer_live
+TEST_STYLE=法式中古风 python -m tests.test_analyzer_live
+```
+
+### 4. 单测 copywriter
+
+```bash
+python -m tests.test_copywriter_live
+```
+
+同样支持 `TEST_STYLE` 切换。
 
 ---
 
-## 待拍板决策（见 `产品文档.md` 附录 C）
+## Collector 输出格式
 
-- [ ] 文生图技术栈：奇绩本地 / 云端 API / 微软 credits
-- [ ] LLM 选型：Claude / GPT / Doubao
-- [ ] 前端框架：Next.js / Streamlit / Gradio
+真实 collector 还没接入时，本项目用本地文件夹模拟 collector 最终输出。示例目录：
+
+```text
+data/collect/厚来设计/
+└── <单篇笔记>/
+    ├── metadata.json
+    ├── body.txt
+    ├── full_text_snapshot.txt
+    ├── image_urls.txt
+    ├── images/
+    │   ├── 01.webp
+    │   └── ...
+    └── 采集状态.txt
+```
+
+`core/collect_loader.py` 会把这个目录转成 `CollectedContent`，并把本地图片压缩成 base64 data URI，方便 analyzer 的多模态模型直接读取。
 
 ---
 
-*版本：v0.1.0（B3 Skill 化骨架）· 创建于 2026/06/27*
+## 图片生成
+
+当前配置：
+
+```env
+IMAGE_GEN_PROVIDER=openai_image
+IMAGE_GEN_MODEL=gemini-3.1-flash-image-preview
+```
+
+生成结果会写入：
+
+```text
+data/generated/<uuid>.png
+```
+
+对外返回路径为：
+
+```text
+/static/generated/<uuid>.png
+```
+
+copywriter 会把 `/static/generated/...` 转成本地图片 data URI 再喂给多模态 LLM，确保文案真正看得到生成效果图。
+
+---
+
+## Skill 协议
+
+每个 Agent 保持一致的 Skill 目录格式：
+
+```text
+core/agents/<name>/
+├── SKILL.md
+├── agent.py
+└── __init__.py
+```
+
+`SKILL.md` 负责对外说明输入、输出、工具依赖和状态；`agent.py` 暴露固定入口：
+
+```python
+async def run(...):
+    ...
+```
+
+完整协议见 `docs/SKILL_PROTOCOL.md`。
+
+---
+
+## Git 与数据约束
+
+- `.env` 不提交。
+- `data/generated/` 不提交。
+- 大体量运行时产物不提交。
+- `data/collect/厚来设计` 是当前非 collector 联调用的示例采集数据，可以保留在仓库中。
+
+---
+
+## 当前推荐 Demo 命令
+
+```bash
+python -m tests.smoke_from_collect
+```
+
+这是目前最接近完整产品闭环的命令：跳过尚未接入的 collector，跑通后面 4 个 Agent，并输出最终小红书图文结果。

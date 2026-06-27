@@ -32,7 +32,7 @@ tools:                      # 依赖的工具层模块，便于做 import 拓扑
   - <string>
   - <string>
 owner: <string>             # 负责人（kafka / TBD / ...）
-status: <enum>              # skeleton | in_progress | done
+status: <enum>              # skeleton | in_progress | done | live
 ---
 ```
 
@@ -184,7 +184,24 @@ from core.agents.analyzer.agent import run as analyzer_run
 ...
 ```
 
-skill_loader 实现完成后，把硬编码 import 整体替换为 `_skills = load_skills()` 即可，不影响其他 Agent 的开发。
+当前为了在 collector 未接入前跑通后续链路，`orchestrator.run(...)` 已支持两个联调入口：
+
+```python
+async def run(
+    request: UserRequest,
+    collected_content: CollectedContent | None = None,
+    collect_dir: str | None = None,
+) -> FinalPost:
+    ...
+```
+
+优先级：
+
+1. `collected_content`：测试代码可直接传标准 `CollectedContent`。
+2. `collect_dir`：读取 `data/collect/<账号>` 这类本地采集结果文件夹。
+3. 都不传：调用真实 `collector_run(request)`。
+
+skill_loader 实现完成后，把硬编码 import 整体替换为 `_skills = load_skills()` 即可；但要保留上述 collector 旁路能力，方便 demo / 测试在采集 Agent 不稳定时仍能跑完整后 4 步。
 
 ---
 

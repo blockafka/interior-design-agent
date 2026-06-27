@@ -2,7 +2,7 @@
 
 > Step 5 · 文案 Agent 的真实实现计划（`core/agents/copywriter/`）
 >
-> 负责：kafka · 状态：**文档待审 / 实现待启动** · 创建：2026-06-27
+> 负责：kafka · 状态：**已实现 / 已联调进非 collector 主链路** · 创建：2026-06-27
 >
 > 本文档是 `core/agents/copywriter/SKILL.md` 契约的**实施细节版**。SKILL.md 是"对外契约"（给 loader / 评委 / 队友看），本文档是"开发笔记"（只给 kafka 自己看）。
 >
@@ -49,7 +49,7 @@
 
 ---
 
-## 0. 待 kafka 拍板（5 个决策，默认值已给推荐）
+## 0. 已拍板决策（5 个决策，按推荐方案实现）
 
 > 这些是写代码前必须定的设计岔路。每个都给了推荐 + 理由，你勾"采纳推荐"或改即可。**未拍板前不动手实现。**
 
@@ -113,9 +113,9 @@
 
 **开发期 vs 生产期的图片来源（复用 analyzer 结论）**：
 
-- **生产期**（generator 真实接入后）：`GeneratedImages.image_urls` 是公网 http URL（generator 生成的效果图），copywriter 直接传给 vision LLM
-- **开发期**（当前）：generator 还是 mock（返回 placehold.co 占位图）。测试时用 `material/<style>/` 的**设计风格图**当"生成的设计图"mock——这些图本身就是设计效果图，语义对得上
-- **代码侧透明**：`tools/llm.py::chat_with_images` 同时支持 http URL 和 `data:image/...;base64,...`，copywriter 业务逻辑**完全不区分两者**。集成期切换零修改
+- **生产期 / 当前联调期**：generator 已接入真实图片生成时，`GeneratedImages.image_urls` 返回 `/static/generated/<file>.png`；copywriter 会自动读取本地 `data/generated/<file>.png`，压缩并转成 data URI 给多模态 LLM。若未来 generator 返回公网 http URL，也可直接透传
+- **单元测试期**：仍可用 `material/<style>/` 的**设计风格图**当"生成的设计图"mock——这些图本身就是设计效果图，语义对得上
+- **代码侧透明**：`tools/llm.py::chat_with_images` 同时支持 http URL 和 `data:image/...;base64,...`，copywriter 业务主逻辑不关心图片来自真实生成、公网 URL 还是本地测试 fixture
 
 ---
 
@@ -540,7 +540,8 @@ tests/
 
 | 风险 | 概率 | 影响 | 处置 |
 |---|---|---|---|
-| 测试期 generator mock 返回 placehold.co 占位图 | **已绕过** | - | 测试期用 `material/<style>/` 设计图当 mock（见 §4.7.3） |
+| generator 返回 `/static/generated/...` 本地静态路径 | **已解决** | 中 | copywriter 自动映射到 `data/generated/<file>`，压缩并转 data URI 后给多模态 LLM |
+| 单元测试期使用 material mock 图 | **已保留** | - | `test_copywriter_live.py` 继续用 `material/<style>/` 设计图做独立验证（见 §4.7.3） |
 | LLM 输出 JSON 不严格 | 中 | 校验炸 | 解析层 strip + 重试 + MOCK_COPY 兜底 |
 | doubao 限流 / 抖动 | 中 | 偶发 5xx | 90s 超时 + 兜底（analyzer 已验证 HTTP backoff 有效） |
 | 单张设计图过大 | **已解决** | - | helper 预压缩（Pillow 长边 1024 + JPEG 75），复用 analyzer 修复 |
@@ -551,7 +552,7 @@ tests/
 
 - **测试期**：`test_copywriter_live.py` 维护 `STYLE_DNA_MOCKS`（4 风格手写 StyleDNA）+ 调 helper 从 `material/<style>/` 加载设计图 + `MOCK_USER_REQUEST`（编的户型）。三者同风格联动
 - **生产期**：analyzer 真实产出 StyleDNA、generator 真实产出设计图、前端传真实 UserRequest，copywriter 透传，**业务代码零修改**
-- **`make smoke`**：orchestrator 硬编码串联 5 Agent，copywriter 上游是 mock 的 StyleDNA/GeneratedImages/UserRequest，能验证"接口契约 + 下游可消费"
+- **`python -m tests.smoke_from_collect`**：orchestrator 用 `data/collect/厚来设计` 跳过 collector，真实串联 analyzer / prompter / generator / copywriter；copywriter 会读取 generator 生成的本地效果图并输出最终营销文案
 
 **测试风格清单**（复用 analyzer）：
 
