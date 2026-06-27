@@ -1,111 +1,83 @@
+"""统一 LLM 调用层（OpenAI 兼容协议 / 走 doubao-seed-2-0-pro-260215）
+
+全队共用：analyzer / prompter / copywriter 等 Agent 通过此模块调 LLM，
+避免每个 Agent 自建 client / 各自维护 retry & auth。
+
+约定：
+- chat()              纯文本对话
+- chat_with_images()  多模态：user 同时含 text + image_url（http URL 或 data:URI 均可）
+- 仅做单次 HTTP 调用，重试由调用方（analyzer 的 3 级兜底链）负责
+
+环境变量：
+- OPENAI_API_KEY     必填
+- OPENAI_BASE_URL    可选，默认 https://api.openai-next.com/v1
 """
-LLM 统一 client（屏蔽 Gemini / Claude / GPT / Doubao 差异）
 
-提供：
-- chat(messages, model=None)       → 文本回复
-- vision(image_url, prompt, ...)   → 多模态视觉理解（占位 mock）
-
-provider 通过环境变量 LLM_PROVIDER 切换：
-    mock / gemini / anthropic / openai / doubao
-当前仅实现 mock + gemini，其它 provider 走 mock 兜底。
-
-负责人：A · Agent 工程师
-"""
-
-from __future__ import annotations
-
-import logging
 import os
 
-logger = logging.getLogger(__name__)
+import httpx
+from dotenv import load_dotenv
+
+load_dotenv()
+
+_DEFAULT_BASE_URL = "https://api.openai-next.com/v1"
+_DEFAULT_MODEL = "doubao-seed-2-0-pro-260215"
 
 
-# ---------------------------------------------------------------
-# 内部工具
-# ---------------------------------------------------------------
-def _messages_to_prompt(messages: list[dict]) -> str:
-    """把 OpenAI 风格 messages 拍平为单个 prompt 字符串（喂给 Gemini）。"""
-    parts: list[str] = []
-    for msg in messages:
-        role = (msg.get("role") or "user").lower()
-        content = msg.get("content") or ""
-        if not content:
-            continue
-        if role == "system":
-            parts.append(f"[系统指令]\n{content}")
-        elif role == "assistant":
-            parts.append(f"[助手历史回复]\n{content}")
-        else:
-            parts.append(f"[用户输入]\n{content}")
-    return "\n\n".join(parts) if parts else ""
+async def chat(
+    *,
+    system: str | None = None,
+    user: str,
+    model: str = _DEFAULT_MODEL,
+    temperature: float = 0.7,
+    timeout: float = 30.0,
+) -> str:
+    """纯文本对话，返回 assistant 的文本回复。"""
+    messages: list[dict] = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": user})
+    return await _call(messages, model, temperature, timeout)
 
 
-def _mock_chat() -> str:
-    """所有 provider 调用失败 / 未配置时的兜底返回。"""
-    return "MOCK LLM 输出"
+async def chat_with_images(
+    *,
+    system: str | None = None,
+    user_text: str,
+    image_urls: list[str],
+    model: str = _DEFAULT_MODEL,
+    temperature: float = 0.7,
+    timeout: float = 90.0,
+) -> str:
+    """多模态对话。image_urls 元素可同时为 http URL 或 'data:image/...;base64,...'。"""
+    user_content: list[dict] = [{"type": "text", "text": user_text}]
+    for url in image_urls:
+        user_content.append({"type": "image_url", "image_url": {"url": url}})
+    messages: list[dict] = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": user_content})
+    return await _call(messages, model, temperature, timeout)
 
 
-# ---------------------------------------------------------------
-# 对外 API
-# ---------------------------------------------------------------
-async def chat(messages: list[dict], model: str | None = None) -> str:
-    """
-    统一文本对话接口。
-
-    Args:
-        messages: OpenAI 风格的消息列表，每项形如 {"role": "system|user|assistant", "content": "..."}
-        model:    可选模型 override；不传则读环境变量默认值。
-
-    Returns:
-        模型回复纯文本。出错或未配置时返回 mock 文本，不抛异常。
-    """
-    provider = (os.getenv("LLM_PROVIDER", "mock") or "mock").lower()
-
-    if provider == "gemini":
-        return await _gemini_chat(messages, model)
-
-    # 其它 provider（anthropic / openai / doubao）暂未接入，统一走 mock
-    if provider != "mock":
-        logger.warning("LLM_PROVIDER=%s 尚未实现，降级到 mock", provider)
-    return _mock_chat()
-
-
-async def vision(image_url: str, prompt: str, model: str | None = None) -> str:
-    """
-    多模态视觉理解（kafka 的 analyzer 后续会接入）。当前保持 mock。
-    """
-    return "MOCK 视觉分析"
-
-
-# ---------------------------------------------------------------
-# Gemini 实现
-# ---------------------------------------------------------------
-async def _gemini_chat(messages: list[dict], model: str | None) -> str:
-    try:
-        from google import genai  # type: ignore
-    except Exception as exc:  # ImportError 或环境问题
-        logger.error("google-genai 未安装，降级到 mock：%s", exc)
-        return _mock_chat()
-
-    api_key = os.getenv("GEMINI_API_KEY", "").strip()
+async def _call(messages: list[dict], model: str, temperature: float, timeout: float) -> str:
+    api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
-        logger.warning("GEMINI_API_KEY 未配置，降级到 mock")
-        return _mock_chat()
+        raise RuntimeError("OPENAI_API_KEY 未设置，请检查 .env")
+    base_url = os.getenv("OPENAI_BASE_URL", _DEFAULT_BASE_URL).rstrip("/")
 
-    target_model = model or os.getenv("GEMINI_TEXT_MODEL", "gemini-2.5-pro")
-    prompt = _messages_to_prompt(messages)
-
-    try:
-        client = genai.Client(api_key=api_key)
-        response = client.models.generate_content(
-            model=target_model,
-            contents=prompt,
+    async with httpx.AsyncClient(timeout=timeout, trust_env=False) as client:
+        resp = await client.post(
+            f"{base_url}/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": model,
+                "messages": messages,
+                "temperature": temperature,
+            },
         )
-        text = getattr(response, "text", None)
-        if not text:
-            logger.warning("Gemini 返回空文本，降级到 mock")
-            return _mock_chat()
-        return text
-    except Exception as exc:
-        logger.error("Gemini chat 调用失败，降级到 mock：%s", exc)
-        return _mock_chat()
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"]
