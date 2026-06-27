@@ -17,15 +17,25 @@ from core.agents.collector.agent import run as collector_run
 from core.agents.copywriter.agent import run as copywriter_run
 from core.agents.generator.agent import run as generator_run
 from core.agents.prompter.agent import run as prompter_run
-from core.schemas import FinalPost, UserRequest
+from core.collect_loader import load_collected_content
+from core.schemas import CollectedContent, FinalPost, UserRequest
 
 
-async def run(request: UserRequest) -> FinalPost:
-    """5 Agent 串行编排（先跑通，后续再加并行 / 重试 / 回退）"""
+async def run(
+    request: UserRequest,
+    collected_content: CollectedContent | None = None,
+    collect_dir: str | None = None,
+) -> FinalPost:
+    """5 Agent 串行编排；联调期可用 collect_dir 跳过真实采集 Agent。"""
     request_id = str(uuid.uuid4())
 
-    # Step 1 · 采集
-    content = await collector_run(request)
+    # Step 1 · 采集（采集 Agent 未接入时，可传 collect_dir 读取本地采集样例）
+    if collected_content is not None:
+        content = collected_content
+    elif collect_dir:
+        content = load_collected_content(collect_dir, target_account_id=request.target_account_id)
+    else:
+        content = await collector_run(request)
 
     # Step 2 · 风格分析（kafka 负责的 Skill）
     style = await analyzer_run(content)
