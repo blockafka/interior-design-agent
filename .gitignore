@@ -35,6 +35,8 @@ Thumbs.db
 
 # ===== Project =====
 data/cache/
+data/generated/
+examples/generated_samples/*.png
 *.log
 logs/
 

@@ -1,17 +1,20 @@
 """
 Step 3 + Step 4 多场景批量测试
 
-测试多种风格，每种生成 3 张图，结果存入 data/generated/ 和 examples/generated_samples/
+测试多种风格，每种生成 3 张图，结果存入 examples/generated_samples/
+
+用法：
+  pytest tests/test_batch_generate.py -v
+  或手动：python tests/test_batch_generate.py
 """
 
-import asyncio
-import io
 import json
 import shutil
 import sys
 from pathlib import Path
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from dotenv import load_dotenv
@@ -104,67 +107,67 @@ SCENARIOS = [
 ]
 
 
-async def run_scenario(scenario: dict, index: int) -> dict:
-    name = scenario["name"]
-    print(f"\n{'='*60}")
-    print(f"[场景 {index+1}] {name}")
-    print(f"{'='*60}")
-
-    # Step 3
-    print(f"  Step 3: 生成提示词中...")
+@pytest.mark.asyncio
+@pytest.mark.parametrize("scenario", SCENARIOS, ids=[s["name"] for s in SCENARIOS])
+async def test_batch_scenario(scenario):
+    """每个风格场景：Step 3 生成 prompt → Step 4 生成 3 张图。"""
     prompts = await prompter_run(scenario["style"], scenario["request"])
-    print(f"  Step 3 完成! prompt 长度: {len(prompts.positive_prompt)} 字")
-    print(f"  prompt 前80字: {prompts.positive_prompt[:80]}...")
 
-    # Step 4 (3 张图)
-    print(f"  Step 4: 生成 3 张图中（预计 1-2 分钟）...")
+    assert prompts.positive_prompt, f"[{scenario['name']}] positive_prompt 不应为空"
+    assert len(prompts.positive_prompt) > 50
+
     images = await generator_run(prompts, num_images=3)
-    print(f"  Step 4 完成! 生成 {len(images.image_urls)} 张图")
-    for i, url in enumerate(images.image_urls):
-        print(f"    图 {i+1}: {url}")
 
-    return {
-        "scenario_name": name,
-        "positive_prompt": prompts.positive_prompt,
-        "negative_prompt": prompts.negative_prompt,
-        "aspect_ratio": prompts.aspect_ratio,
-        "image_urls": images.image_urls,
-    }
+    assert len(images.image_urls) == 3, f"[{scenario['name']}] 应生成 3 张图"
+    for url in images.image_urls:
+        assert url, "图片 URL 不应为空"
 
 
-async def main() -> None:
-    print("=" * 60)
-    print("Step 3 + Step 4 多场景批量测试")
-    print(f"共 {len(SCENARIOS)} 个场景，每个生成 3 张图")
-    print("=" * 60)
-
+async def _run_all_and_save():
+    """手动运行时：生成所有场景并保存结果到 examples/。"""
     EXAMPLES_DIR.mkdir(parents=True, exist_ok=True)
-
     all_results = []
 
     for i, scenario in enumerate(SCENARIOS):
-        result = await run_scenario(scenario, i)
-        all_results.append(result)
+        name = scenario["name"]
+        print(f"\n{'='*60}")
+        print(f"[场景 {i+1}] {name}")
+        print(f"{'='*60}")
 
-        # 把生成的图片复制到 examples/generated_samples/
-        for j, url in enumerate(result["image_urls"]):
+        print(f"  Step 3: 生成提示词中...")
+        prompts = await prompter_run(scenario["style"], scenario["request"])
+        print(f"  Step 3 完成! prompt 长度: {len(prompts.positive_prompt)} 字")
+
+        print(f"  Step 4: 生成 3 张图中...")
+        images = await generator_run(prompts, num_images=3)
+        print(f"  Step 4 完成! 生成 {len(images.image_urls)} 张图")
+        for j, url in enumerate(images.image_urls):
+            print(f"    图 {j+1}: {url}")
+
+        all_results.append({
+            "scenario_name": name,
+            "positive_prompt": prompts.positive_prompt,
+            "negative_prompt": prompts.negative_prompt,
+            "aspect_ratio": prompts.aspect_ratio,
+            "image_urls": images.image_urls,
+        })
+
+        for j, url in enumerate(images.image_urls):
             if url.startswith("/static/generated/"):
                 filename = url.split("/")[-1]
                 src = PROJECT_ROOT / "data" / "generated" / filename
                 if src.exists():
-                    dst_name = f"{scenario['name']}_{j+1}.png"
+                    dst_name = f"{name}_{j+1}.png"
                     dst = EXAMPLES_DIR / dst_name
                     shutil.copy2(src, dst)
                     print(f"  -> 已复制到 examples/generated_samples/{dst_name}")
 
-    # 保存完整结果 JSON
     results_file = EXAMPLES_DIR / "test_results.json"
     with open(results_file, "w", encoding="utf-8") as f:
         json.dump(all_results, f, ensure_ascii=False, indent=2)
-    print(f"\n{'='*60}")
-    print(f"全部完成! 结果汇总: examples/generated_samples/test_results.json")
-    print(f"{'='*60}")
+    print(f"\n全部完成! 结果: examples/generated_samples/test_results.json")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    import asyncio
+    asyncio.run(_run_all_and_save())

@@ -9,14 +9,16 @@ Agent 4 · 图片生成 Agent · 实现
 
 实现：
 - 默认生成 3 张图片（封面主图 / 空间细节 / 生活氛围）；
-- 单张失败回退 placeholder，保证至少返回 1 张；
+- 并发调用文生图 API，单张失败回退 placeholder；
 - 通过 tools.image_gen.text_to_image 调用文生图。
 """
 
 from __future__ import annotations
 
+import asyncio
 import logging
 
+from core.constants import PLACEHOLDER_IMAGE_URL
 from core.schemas import GeneratedImages, ImagePromptBundle
 from tools.image_gen import text_to_image
 
@@ -28,29 +30,33 @@ VARIANT_HINTS: list[str] = [
     "生活氛围图，突出自然光与居住感，让画面有真实生活气息",
 ]
 
-_PLACEHOLDER_URL = "https://placehold.co/600x800?text=Generated+Image"
-
 
 async def run(prompts: ImagePromptBundle, num_images: int = 3) -> GeneratedImages:
     n = max(1, int(num_images or 1))
 
-    image_urls: list[str] = []
-    for i in range(n):
-        hint = VARIANT_HINTS[i % len(VARIANT_HINTS)]
-        variant_prompt = f"{prompts.positive_prompt}\n\n本张图侧重：{hint}"
-        try:
-            url = await text_to_image(
-                prompt=variant_prompt,
-                negative_prompt=prompts.negative_prompt,
-                aspect_ratio=prompts.aspect_ratio or "3:4",
-            )
-        except Exception as exc:
-            logger.error("generator: text_to_image 抛异常，回退 placeholder：%s", exc)
-            url = _PLACEHOLDER_URL
+    tasks = [_generate_one(prompts, i) for i in range(n)]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        image_urls.append(url or _PLACEHOLDER_URL)
+    image_urls: list[str] = []
+    for r in results:
+        if isinstance(r, Exception):
+            logger.error("generator: 并发生成失败，回退 placeholder：%s", r)
+            image_urls.append(PLACEHOLDER_IMAGE_URL)
+        else:
+            image_urls.append(r or PLACEHOLDER_IMAGE_URL)
 
     if not image_urls:
-        image_urls = [_PLACEHOLDER_URL]
+        image_urls = [PLACEHOLDER_IMAGE_URL]
 
     return GeneratedImages(image_urls=image_urls, prompts_used=prompts)
+
+
+async def _generate_one(prompts: ImagePromptBundle, index: int) -> str:
+    hint = VARIANT_HINTS[index % len(VARIANT_HINTS)]
+    variant_prompt = f"{prompts.positive_prompt}\n\n本张图侧重：{hint}"
+    url = await text_to_image(
+        prompt=variant_prompt,
+        negative_prompt=prompts.negative_prompt,
+        aspect_ratio=prompts.aspect_ratio or "3:4",
+    )
+    return url or PLACEHOLDER_IMAGE_URL

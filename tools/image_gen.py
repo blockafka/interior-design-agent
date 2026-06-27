@@ -28,7 +28,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 GENERATED_DIR = PROJECT_ROOT / "data" / "generated"
 HTTP_PREFIX = "/static/generated"
 
-_PLACEHOLDER_URL = "https://placehold.co/600x800?text=Generated+Image"
+from core.constants import PLACEHOLDER_IMAGE_URL
 
 
 # ---------------------------------------------------------------
@@ -49,30 +49,50 @@ async def text_to_image(
 
     if provider != "mock":
         logger.warning("IMAGE_GEN_PROVIDER=%s 尚未实现，降级到 mock", provider)
-    return _PLACEHOLDER_URL
+    return PLACEHOLDER_IMAGE_URL
 
 
 # ---------------------------------------------------------------
 # OpenAI Image 实现（gpt-image-1 via 中转平台）
 # ---------------------------------------------------------------
+
+_client = None
+
+
+def _get_client():
+    """惰性单例：复用 AsyncOpenAI client 避免每次调用新建连接。"""
+    global _client
+    if _client is None:
+        try:
+            from openai import AsyncOpenAI
+        except ImportError as exc:
+            raise ImportError("openai 包未安装") from exc
+
+        api_key = os.getenv("OPENAI_API_KEY", "").strip()
+        base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai-next.com/v1").strip()
+        _client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+    return _client
+
+
 async def _openai_image(
     prompt: str, negative_prompt: str, aspect_ratio: str
 ) -> str:
     try:
-        from openai import OpenAI
+        client = _get_client()
     except ImportError as exc:
         logger.error("openai 包未安装，降级到 placeholder：%s", exc)
-        return _PLACEHOLDER_URL
+        return PLACEHOLDER_IMAGE_URL
 
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai-next.com/v1").strip()
-
     if not api_key:
         logger.warning("OPENAI_API_KEY 未配置，降级到 placeholder")
-        return _PLACEHOLDER_URL
+        return PLACEHOLDER_IMAGE_URL
 
     model = os.getenv("IMAGE_GEN_MODEL", "gpt-image-1")
 
+    # NOTE: OpenAI images API 不原生支持 negative_prompt 参数。
+    # 此处通过文本拼接方式注入，对 gpt-image-1 效果有限但聊胜于无。
+    # 待后续切换 SD/Flux 时可使用原生 negative_prompt 参数。
     full_prompt = prompt.strip()
     if negative_prompt.strip():
         full_prompt += f"\n\n避免以下问题：{negative_prompt.strip()}"
@@ -80,12 +100,12 @@ async def _openai_image(
     size = _aspect_ratio_to_size(aspect_ratio)
 
     try:
-        client = OpenAI(api_key=api_key, base_url=base_url)
-        response = client.images.generate(
+        response = await client.images.generate(
             model=model,
             prompt=full_prompt,
             n=1,
             size=size,
+            response_format="b64_json",
         )
 
         image_data = response.data[0]
@@ -101,20 +121,20 @@ async def _openai_image(
             return image_data.url
         else:
             logger.warning("OpenAI Image 未返回有效数据，降级到 placeholder")
-            return _PLACEHOLDER_URL
+            return PLACEHOLDER_IMAGE_URL
 
     except Exception as exc:
         logger.error("OpenAI Image 调用失败，降级到 placeholder：%s", exc)
-        return _PLACEHOLDER_URL
+        return PLACEHOLDER_IMAGE_URL
 
 
 def _aspect_ratio_to_size(aspect_ratio: str) -> str:
-    """把 aspect_ratio 映射为 OpenAI images API 支持的 size 参数。"""
+    """映射为 gpt-image-1 支持的标准 size（仅 1024x1024/1024x1792/1792x1024）。"""
     mapping = {
-        "3:4": "768x1024",
-        "4:3": "1024x768",
-        "1:1": "1024x1024",
-        "16:9": "1792x1024",
+        "3:4": "1024x1792",
         "9:16": "1024x1792",
+        "4:3": "1792x1024",
+        "16:9": "1792x1024",
+        "1:1": "1024x1024",
     }
     return mapping.get(aspect_ratio, "1024x1024")

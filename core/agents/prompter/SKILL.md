@@ -7,7 +7,7 @@ output_schema: ImagePromptBundle
 tools:
   - tools.llm.chat
 owner: TBD
-status: skeleton
+status: implemented
 ---
 
 # Step 3 · 提示词工程 Agent

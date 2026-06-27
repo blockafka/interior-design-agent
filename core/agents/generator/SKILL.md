@@ -7,7 +7,7 @@ output_schema: GeneratedImages
 tools:
   - tools.image_gen.text_to_image
 owner: TBD
-status: skeleton
+status: implemented
 ---
 
 # Step 4 · 图片生成 Agent

@@ -22,6 +22,9 @@ from tools.llm import chat
 
 logger = logging.getLogger(__name__)
 
+_LLM_MODEL = "doubao-seed-2-0-pro-260215"
+_LLM_TEMPERATURE = 0.75
+
 NEGATIVE_PROMPT_FIXED = (
     "低清晰度，模糊，卡通，动漫，插画，CG感，塑料质感，过度渲染，"
     "样板间感过强，完全对称构图，空间空旷，过度整洁，过度杂乱，"
@@ -54,6 +57,8 @@ async def run(style: StyleDNA, request: UserRequest) -> ImagePromptBundle:
         raw = await chat(
             system=_build_system_prompt(),
             user=_build_user_prompt(ctx),
+            model=_LLM_MODEL,
+            temperature=_LLM_TEMPERATURE,
         )
     except Exception as exc:
         logger.error("prompter: LLM 调用异常，走本地兜底：%s", exc)
@@ -158,10 +163,18 @@ def _extract_json(text: str) -> dict | None:
             return obj if isinstance(obj, dict) else None
         except Exception:
             pass
-    brace = re.search(r"\{.*\}", text, re.DOTALL)
+    brace = re.search(r"\{[^{}]*\}", text, re.DOTALL)
     if brace:
         try:
             obj = json.loads(brace.group(0))
+            return obj if isinstance(obj, dict) else None
+        except Exception:
+            pass
+    # 回退：贪婪匹配（适用于嵌套 JSON 的极端情况）
+    brace_greedy = re.search(r"\{.*\}", text, re.DOTALL)
+    if brace_greedy and brace_greedy.group(0) != (brace.group(0) if brace else ""):
+        try:
+            obj = json.loads(brace_greedy.group(0))
             return obj if isinstance(obj, dict) else None
         except Exception:
             pass
