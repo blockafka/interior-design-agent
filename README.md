@@ -91,6 +91,64 @@ http://localhost:5173
 
 > 如果项目路径里包含冒号，例如 `Beyond Prompt: Agents in Action`，不要使用 `npm run dev`；npm 会把冒号当作 PATH 分隔符，导致 `vite: command not found`。请直接使用 `./node_modules/.bin/vite`。
 
+## 临时公网演示：Cloudflare Quick Tunnel
+
+如果想让评委或朋友通过公网访问本地电脑上的 demo，可以用 Cloudflare Quick Tunnel 暴露前端端口。需要保持本地电脑联网，并同时运行后端、前端和 tunnel 三个进程。
+
+### 1. 启动后端
+
+```bash
+cd "/Users/kafka/Desktop/files/bussiness_test/Hackathon/Beyond Prompt: Agents in Action/interior-design-agent/interior-content-skill"
+python -m server.main
+```
+
+后端默认运行在：
+
+```text
+http://localhost:8000
+```
+
+### 2. 启动前端
+
+```bash
+cd "/Users/kafka/Desktop/files/bussiness_test/Hackathon/Beyond Prompt: Agents in Action/interior-design-agent/interior-content-skill/web"
+./node_modules/.bin/vite --host 0.0.0.0
+```
+
+前端默认运行在：
+
+```text
+http://localhost:5173
+```
+
+### 3. 启动 Quick Tunnel
+
+```bash
+cloudflared tunnel --url http://localhost:5173
+```
+
+启动后终端会输出一个临时公网地址，例如：
+
+```text
+https://xxxx-xxxx-xxxx.trycloudflare.com
+```
+
+打开这个地址即可访问 Web demo。前端中的 `/api` 请求会继续通过 Vite proxy 转发到本地后端 `localhost:8000`。
+
+可以用下面的地址检查后端是否也通过公网打通：
+
+```text
+https://xxxx-xxxx-xxxx.trycloudflare.com/api/health
+```
+
+如果返回类似下面的 JSON，说明前后端都可通过公网访问：
+
+```json
+{"status":"ok","timestamp":"..."}
+```
+
+> 注意：Quick Tunnel 的 `*.trycloudflare.com` 地址是临时链接。电脑睡眠、断网太久或重启 `cloudflared` 后，链接可能变化；正式演示前请重新确认当前 tunnel 输出的最新公网地址。
+
 ## 示例数据
 
 内置对标账号样本位于：
