@@ -2,20 +2,52 @@ import { useEffect, useRef, useState } from 'react'
 import AgentNode from './AgentNode'
 
 const STEPS = [
-  { key: 'collector', label: '采集', icon: '📂' },
-  { key: 'analyzer', label: '风格分析', icon: '📊' },
-  { key: 'prompter', label: '提示词', icon: '🎨' },
-  { key: 'generator', label: '生图', icon: '🖼️' },
-  { key: 'copywriter', label: '文案', icon: '✍️' },
+  { key: 'collector', label: '采集', icon: '📂', weight: 5 },
+  { key: 'analyzer', label: '风格分析', icon: '📊', weight: 15 },
+  { key: 'prompter', label: '提示词', icon: '🎨', weight: 10 },
+  { key: 'generator', label: '生图', icon: '🖼️', weight: 55 },
+  { key: 'copywriter', label: '文案', icon: '✍️', weight: 15 },
+]
+
+const GENERATOR_TIPS = [
+  '正在渲染空间光影效果...',
+  '调整材质质感与纹理细节...',
+  '优化色彩搭配与氛围感...',
+  '处理软装陈设与空间比例...',
+  '精修自然光照与阴影层次...',
+  '生成高分辨率效果图中...',
 ]
 
 export default function GeneratingView({ formData, steps, setSteps, onComplete }) {
   const [currentMessage, setCurrentMessage] = useState('正在初始化...')
   const [intermediateResults, setIntermediateResults] = useState({})
+  const [elapsed, setElapsed] = useState(0)
+  const [tipIndex, setTipIndex] = useState(0)
   const startTimeRef = useRef(Date.now())
+  const timerRef = useRef(null)
+  const tipTimerRef = useRef(null)
 
   useEffect(() => {
     startTimeRef.current = Date.now()
+    timerRef.current = setInterval(() => {
+      setElapsed(Math.round((Date.now() - startTimeRef.current) / 1000))
+    }, 1000)
+    return () => clearInterval(timerRef.current)
+  }, [])
+
+  useEffect(() => {
+    const isGenerating = steps.some(s => s.key === 'generator' && s.status === 'running')
+    if (isGenerating) {
+      tipTimerRef.current = setInterval(() => {
+        setTipIndex(prev => (prev + 1) % GENERATOR_TIPS.length)
+      }, 4000)
+    } else {
+      clearInterval(tipTimerRef.current)
+    }
+    return () => clearInterval(tipTimerRef.current)
+  }, [steps])
+
+  useEffect(() => {
     const abortController = new AbortController()
     const body = JSON.stringify(formData)
 
@@ -84,8 +116,9 @@ export default function GeneratingView({ formData, steps, setSteps, onComplete }
         setCurrentMessage(data.message)
       }
     } else if (event === 'complete') {
-      const elapsed = Math.round((Date.now() - startTimeRef.current) / 1000)
-      onComplete(data, elapsed)
+      clearInterval(timerRef.current)
+      const totalElapsed = Math.round((Date.now() - startTimeRef.current) / 1000)
+      onComplete(data, totalElapsed)
     } else if (event === 'error') {
       setCurrentMessage(`❌ 错误: ${data.message}`)
     }
@@ -96,27 +129,38 @@ export default function GeneratingView({ formData, steps, setSteps, onComplete }
     return step ? step.status : 'idle'
   }
 
-  const completedCount = steps.filter(s => s.status === 'done').length
-  const progress = Math.round((completedCount / STEPS.length) * 100)
+  const isGeneratorRunning = steps.some(s => s.key === 'generator' && s.status === 'running')
+  const displayMessage = isGeneratorRunning ? GENERATOR_TIPS[tipIndex] : currentMessage
+
+  const progress = (() => {
+    let total = 0
+    for (const step of STEPS) {
+      const s = steps.find(st => st.key === step.key)
+      if (s?.status === 'done') total += step.weight
+      else if (s?.status === 'running') total += step.weight * 0.3
+    }
+    return Math.min(Math.round(total), 99)
+  })()
 
   return (
     <div className="animate-fade-in-up max-w-2xl mx-auto">
       <div className="text-center mb-10">
-        <h2 className="text-2xl font-bold text-white mb-2">🧠 AI Agent 正在为你创作</h2>
-        <p className="text-slate-400 text-sm">多个 Agent 协同工作中，请稍候...</p>
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">🧠 AI Agent 正在为你创作</h2>
+        <p className="text-slate-400 text-sm md:text-base">多个 Agent 协同工作中，请稍候...</p>
+        <p className="text-slate-500 text-xs mt-2 tabular-nums">已用时 {elapsed}s</p>
       </div>
 
       {/* Pipeline 可视化 */}
-      <div className="flex items-center justify-center gap-2 mb-8 flex-wrap">
+      <div className="flex items-center justify-center gap-1 sm:gap-2 mb-8">
         {STEPS.map((step, i) => (
-          <div key={step.key} className="flex items-center gap-2">
+          <div key={step.key} className="flex items-center gap-1 sm:gap-2">
             <AgentNode
               icon={step.icon}
               label={step.label}
               status={getStepStatus(step.key)}
             />
             {i < STEPS.length - 1 && (
-              <div className="text-slate-600 text-lg">→</div>
+              <div className="text-slate-600 text-sm sm:text-lg">→</div>
             )}
           </div>
         ))}
@@ -125,12 +169,12 @@ export default function GeneratingView({ formData, steps, setSteps, onComplete }
       {/* 进度条 */}
       <div className="mb-6">
         <div className="flex justify-between text-xs text-slate-500 mb-1">
-          <span>{currentMessage}</span>
-          <span>{progress}%</span>
+          <span className="transition-all duration-500">{displayMessage}</span>
+          <span className="tabular-nums">{progress}%</span>
         </div>
         <div className="h-2 bg-white/5 rounded-full overflow-hidden">
           <div
-            className="h-full bg-blue-500 rounded-full progress-bar-striped transition-all duration-700"
+            className="h-full bg-blue-500 rounded-full progress-bar-striped transition-all duration-1000 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>

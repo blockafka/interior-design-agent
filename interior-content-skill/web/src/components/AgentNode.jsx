@@ -1,5 +1,17 @@
+import { useEffect, useState } from 'react'
+
 export default function AgentNode({ icon, label, status }) {
-  const base = 'flex flex-col items-center gap-1 p-3 rounded-lg border transition-all duration-500 min-w-[70px]'
+  const [justDone, setJustDone] = useState(false)
+
+  useEffect(() => {
+    if (status === 'done') {
+      setJustDone(true)
+      const t = setTimeout(() => setJustDone(false), 600)
+      return () => clearTimeout(t)
+    }
+  }, [status])
+
+  const base = 'flex flex-col items-center gap-1 p-2 sm:p-3 rounded-lg border transition-all duration-500 min-w-[56px] sm:min-w-[70px]'
 
   let style = ''
   if (status === 'done') {
@@ -11,11 +23,11 @@ export default function AgentNode({ icon, label, status }) {
   }
 
   return (
-    <div className={`${base} ${style}`}>
-      <span className="text-2xl">{icon}</span>
-      <span className="text-xs text-slate-300">{label}</span>
+    <div className={`${base} ${style} ${justDone ? 'animate-bounce-once' : ''}`}>
+      <span className="text-xl sm:text-2xl">{icon}</span>
+      <span className="text-[10px] sm:text-xs text-slate-300">{label}</span>
       {status === 'done' && <span className="text-green-400 text-xs">✓</span>}
-      {status === 'running' && <span className="text-blue-400 text-xs">●</span>}
+      {status === 'running' && <span className="text-blue-400 text-xs animate-pulse">●</span>}
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import NavBar from './components/NavBar'
+import HeroBackground from './components/HeroBackground'
 import InputView from './components/InputView'
 import GeneratingView from './components/GeneratingView'
 import ResultView from './components/ResultView'
@@ -32,8 +33,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
+      {view === 'input' && <HeroBackground />}
       <NavBar />
-      <main className="max-w-5xl mx-auto px-4 py-8">
+      <main className="relative z-10 max-w-5xl mx-auto px-4 py-8">
         {view === 'input' && <InputView onGenerate={handleGenerate} />}
         {view === 'generating' && (
           <GeneratingView
