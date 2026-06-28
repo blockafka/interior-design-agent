@@ -81,7 +81,8 @@ async def _run_pipeline(req: GenerateRequest) -> AsyncGenerator[str, None]:
     try:
         yield _sse_event("step_start", {"step": "collector", "message": "正在加载对标账号素材..."})
         await asyncio.sleep(0.3)
-        content = load_collected_content(COLLECT_SAMPLE_DIR, target_account_id=req.target_account_id)
+        account_dir = COLLECT_SAMPLE_DIR / req.target_account_id
+        content = load_collected_content(account_dir, target_account_id=req.target_account_id)
         yield _sse_event("step_done", {"step": "collector", "message": f"已加载 {len(content.posts)} 篇笔记素材"})
 
         yield _sse_event("step_start", {"step": "analyzer", "message": "正在分析对标账号视觉与文案风格..."})
