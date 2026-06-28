@@ -53,7 +53,8 @@ python -m server.main
 
 # 终端 2：前端 (端口 5173)
 cd interior-content-skill/web
-npm run dev
+npm install              # 首次需安装依赖
+./node_modules/.bin/vite # ⚠️ 路径含冒号("Beyond Prompt:"),npm run dev 会报 vite: command not found,改用 bin 直调
 ```
 
 ### 4. 访问

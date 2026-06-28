@@ -1,7 +1,9 @@
 """把本地采集文件夹转换为标准 CollectedContent。
 
-用于采集 Agent 尚未接入时的联调入口。目录结构参考：
-    data/collect/<账号>/<单篇笔记>/{metadata.json, body.txt, image_urls.txt, images/*}
+用于采集 Agent 尚未接入时的联调入口。
+目录结构（按账号组织，--collect-dir 指到「账号目录」，其下每个子目录是一篇笔记）：
+    <账号目录>/<单篇笔记>/{metadata.json, body.txt, image_urls.txt, images/*}
+例如：examples/collect-sample/厚来设计/<单篇笔记>/
 """
 
 from __future__ import annotations
