@@ -23,9 +23,9 @@ export default function XhsPostCard({ copy }) {
   }
 
   return (
-    <div className="bg-[#1e1e2e] rounded-xl border border-white/5 p-6 h-full flex flex-col">
+    <div className="glass-card rounded-xl p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-slate-400 flex items-center gap-2">
+        <h3 className="text-sm font-medium text-slate-300 flex items-center gap-2">
           <span className="text-red-400">📱</span> 小红书成稿预览
         </h3>
         <button
@@ -40,27 +40,27 @@ export default function XhsPostCard({ copy }) {
         </button>
       </div>
 
-      {/* 模拟小红书卡片 */}
-      <div className="flex-1 bg-white rounded-lg p-5 text-gray-900 overflow-y-auto max-h-[500px]">
+      {/* 文案内容区 */}
+      <div className="flex-1 overflow-y-auto max-h-[500px]">
         {/* 模拟作者信息 */}
-        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/10">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-red-400 flex items-center justify-center text-white text-xs font-bold">
             厚
           </div>
           <div className="flex-1">
-            <div className="text-xs font-medium text-gray-800">厚来设计</div>
-            <div className="text-[10px] text-gray-400">刚刚</div>
+            <div className="text-xs font-medium text-white">厚来设计</div>
+            <div className="text-[10px] text-slate-500">刚刚</div>
           </div>
-          <button className="text-[10px] text-red-500 border border-red-200 rounded-full px-2 py-0.5">+ 关注</button>
+          <span className="text-[10px] text-red-400 border border-red-400/30 rounded-full px-2 py-0.5">+ 关注</span>
         </div>
 
         {/* 标题 */}
-        <h2 className="text-lg font-bold mb-3 leading-snug">
+        <h2 className="text-lg font-bold mb-3 leading-snug text-white">
           {copy.title || '标题生成中...'}
         </h2>
 
         {/* 正文 */}
-        <div className="text-sm leading-relaxed whitespace-pre-line text-gray-700 mb-4">
+        <div className="text-sm leading-relaxed whitespace-pre-line text-slate-300 mb-4">
           {copy.body || '正文生成中...'}
         </div>
 
@@ -69,7 +69,7 @@ export default function XhsPostCard({ copy }) {
           {(copy.hashtags || []).map((tag, i) => (
             <span
               key={i}
-              className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full"
+              className="text-xs text-blue-300 bg-blue-500/15 px-2 py-0.5 rounded-full"
             >
               {tag}
             </span>
@@ -77,11 +77,11 @@ export default function XhsPostCard({ copy }) {
         </div>
 
         {/* 模拟互动栏 */}
-        <div className="flex items-center gap-6 pt-3 border-t border-gray-100 text-gray-400">
-          <span className="flex items-center gap-1 text-xs">❤️ <span className="text-gray-600">1.2k</span></span>
-          <span className="flex items-center gap-1 text-xs">⭐ <span className="text-gray-600">986</span></span>
-          <span className="flex items-center gap-1 text-xs">💬 <span className="text-gray-600">47</span></span>
-          <span className="flex items-center gap-1 text-xs ml-auto">↗ 分享</span>
+        <div className="flex items-center gap-6 pt-3 border-t border-white/10 text-slate-500">
+          <span className="flex items-center gap-1 text-xs">❤️ <span className="text-slate-300">1.2k</span></span>
+          <span className="flex items-center gap-1 text-xs">⭐ <span className="text-slate-300">986</span></span>
+          <span className="flex items-center gap-1 text-xs">💬 <span className="text-slate-300">47</span></span>
+          <span className="flex items-center gap-1 text-xs ml-auto text-slate-400">↗ 分享</span>
         </div>
       </div>
     </div>

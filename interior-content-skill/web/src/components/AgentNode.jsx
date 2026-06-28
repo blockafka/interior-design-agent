@@ -15,11 +15,11 @@ export default function AgentNode({ icon, label, status }) {
 
   let style = ''
   if (status === 'done') {
-    style = 'border-green-500/50 bg-green-500/10'
+    style = 'border-green-500/50 bg-green-900/40'
   } else if (status === 'running') {
-    style = 'border-blue-500/50 bg-blue-500/10 animate-pulse-blue'
+    style = 'border-blue-500/50 bg-blue-900/40 animate-pulse-blue'
   } else {
-    style = 'border-white/10 bg-white/5'
+    style = 'border-white/15 bg-slate-800/60'
   }
 
   return (

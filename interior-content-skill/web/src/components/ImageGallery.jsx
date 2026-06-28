@@ -6,7 +6,7 @@ export default function ImageGallery({ images }) {
 
   if (!images.length) {
     return (
-      <div className="bg-[#1e1e2e] rounded-xl p-8 border border-white/5 text-center text-slate-500">
+      <div className="glass-card rounded-xl p-8 text-center text-slate-500">
         暂无图片
       </div>
     )
@@ -29,9 +29,9 @@ export default function ImageGallery({ images }) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 h-full flex flex-col">
       {/* 主图 */}
-      <div className="bg-[#1e1e2e] rounded-xl border border-white/5 overflow-hidden relative">
+      <div className="glass-card rounded-xl overflow-hidden relative flex-1">
         {!loaded[selected] && (
           <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/0 animate-pulse flex items-center justify-center">
             <span className="text-slate-500 text-sm">加载中...</span>
@@ -70,7 +70,7 @@ export default function ImageGallery({ images }) {
               onLoad={() => setLoaded(prev => ({ ...prev, [i]: true }))}
               onError={(e) => { e.target.src = 'https://placehold.co/200x200/1e1e2e/666?text=' + (i + 1) }}
             />
-            <div className="text-xs text-center py-1 text-slate-400 bg-[#1e1e2e]">
+            <div className="text-xs text-center py-1 text-slate-400 bg-black/40">
               {labels[i] || `图${i + 1}`}
             </div>
           </button>

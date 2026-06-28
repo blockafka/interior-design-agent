@@ -27,15 +27,15 @@ export default function ResultView({ result, elapsed, onReset }) {
         </button>
       </div>
 
-      {/* 主内容区 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* 主内容区 — 等高双栏 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {/* 左：图片 */}
-        <div>
+        <div className="flex flex-col">
           <ImageGallery images={images} />
         </div>
 
         {/* 右：小红书文案 */}
-        <div>
+        <div className="flex flex-col">
           <XhsPostCard copy={copy} />
         </div>
       </div>

@@ -146,33 +146,35 @@ export default function GeneratingView({ formData, steps, setSteps, onComplete }
     <div className="animate-fade-in-up max-w-2xl mx-auto">
       <div className="text-center mb-10">
         <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">🧠 AI Agent 正在为你创作</h2>
-        <p className="text-slate-400 text-sm md:text-base">多个 Agent 协同工作中，请稍候...</p>
-        <p className="text-slate-500 text-xs mt-2 tabular-nums">已用时 {elapsed}s</p>
+        <p className="text-slate-300 text-sm md:text-base">多个 Agent 协同工作中，请稍候...</p>
+        <p className="text-slate-400 text-xs mt-2 tabular-nums">已用时 {elapsed}s</p>
       </div>
 
       {/* Pipeline 可视化 */}
-      <div className="flex items-center justify-center gap-1 sm:gap-2 mb-8">
-        {STEPS.map((step, i) => (
-          <div key={step.key} className="flex items-center gap-1 sm:gap-2">
-            <AgentNode
-              icon={step.icon}
-              label={step.label}
-              status={getStepStatus(step.key)}
-            />
-            {i < STEPS.length - 1 && (
-              <div className="text-slate-600 text-sm sm:text-lg">→</div>
-            )}
-          </div>
-        ))}
+      <div className="glass-card rounded-xl p-5 mb-6">
+        <div className="flex items-center justify-center gap-1 sm:gap-2">
+          {STEPS.map((step, i) => (
+            <div key={step.key} className="flex items-center gap-1 sm:gap-2">
+              <AgentNode
+                icon={step.icon}
+                label={step.label}
+                status={getStepStatus(step.key)}
+              />
+              {i < STEPS.length - 1 && (
+                <div className="text-slate-500 text-sm sm:text-lg">→</div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* 进度条 */}
       <div className="mb-6">
-        <div className="flex justify-between text-xs text-slate-500 mb-1">
-          <span className="transition-all duration-500">{displayMessage}</span>
-          <span className="tabular-nums">{progress}%</span>
+        <div className="flex justify-between text-sm mb-1">
+          <span className="text-slate-200 transition-all duration-500">{displayMessage}</span>
+          <span className="text-white font-medium tabular-nums">{progress}%</span>
         </div>
-        <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+        <div className="h-2.5 bg-white/10 rounded-full overflow-hidden">
           <div
             className="h-full bg-blue-500 rounded-full progress-bar-striped transition-all duration-1000 ease-out"
             style={{ width: `${progress}%` }}

@@ -33,7 +33,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen">
-      {view === 'input' && <HeroBackground />}
+      <HeroBackground static={view === 'result'} />
       <NavBar />
       <main className="relative z-10 max-w-5xl mx-auto px-4 py-8">
         {view === 'input' && <InputView onGenerate={handleGenerate} />}

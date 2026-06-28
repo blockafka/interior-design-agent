@@ -14,7 +14,7 @@ body {
   background: #0a0a0f;
   min-height: 100vh;
   color: var(--text-primary);
-  font-family: Inter, -apple-system, "Microsoft YaHei", sans-serif;
+  font-family: Inter, "Noto Sans SC", -apple-system, "Microsoft YaHei", sans-serif;
 }
 
 #root {
@@ -87,11 +87,13 @@ select option {
 }
 
 .glass-card {
-  background: rgba(24, 24, 38, 0.72);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  background: rgba(18, 18, 32, 0.78);
+  backdrop-filter: blur(20px) saturate(1.1);
+  -webkit-backdrop-filter: blur(20px) saturate(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .tabular-nums {
