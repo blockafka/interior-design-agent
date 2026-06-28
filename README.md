@@ -3,6 +3,8 @@
 > Beyond Prompt: Agents in Action 黑客松项目  
 > 输入户型需求与对标账号，自动生成家装设计效果图和可发布的小红书营销文案。
 
+![Interior Agent Web 演示首页](docs/images/main-page.png)
+
 ## 项目简介
 
 这是一个面向家装内容生产场景的多 Agent 协作系统。用户只需要选择一个对标小红书账号，并填写户型、面积、客户画像和设计诉求，系统会自动完成：
@@ -115,6 +117,7 @@ examples/collect-sample/<账号>/
 ```text
 interior-design-agent/
 ├── README.md                         # 仓库入口，面向黑客松评委
+├── docs/images/main-page.png         # Web 演示首页截图
 └── interior-content-skill/            # 核心 Agent Pipeline
     ├── server/                        # FastAPI + SSE 服务
     ├── web/                           # React 前端演示界面
