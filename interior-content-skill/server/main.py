@@ -48,6 +48,49 @@ app.mount("/static/generated", StaticFiles(directory=str(GENERATED_DIR)), name="
 
 COLLECT_SAMPLE_DIR = SKILL_ROOT / "examples" / "collect-sample"
 
+import re as _re
+
+def _scan_accounts() -> list[dict]:
+    """扫描 collect-sample 目录，返回所有对标账号的摘要信息。"""
+    results = []
+    if not COLLECT_SAMPLE_DIR.exists():
+        return results
+    for acct_dir in sorted(COLLECT_SAMPLE_DIR.iterdir()):
+        if not acct_dir.is_dir():
+            continue
+        post_dirs = sorted([p for p in acct_dir.iterdir() if p.is_dir()])
+        total_liked = 0
+        total_collected = 0
+        sample_title = ""
+        for post_dir in post_dirs:
+            meta_path = post_dir / "metadata.json"
+            if meta_path.exists():
+                try:
+                    raw = meta_path.read_bytes().decode("utf-8")
+                    raw = _re.sub(r"\\\\", "/", raw)
+                    d = json.loads(raw)
+                    try:
+                        total_liked += int(d.get("liked_count") or 0)
+                    except (TypeError, ValueError):
+                        pass
+                    try:
+                        total_collected += int(d.get("collect_count") or 0)
+                    except (TypeError, ValueError):
+                        pass
+                    if not sample_title:
+                        sample_title = d.get("title", "")
+                except Exception:
+                    pass
+        results.append({
+            "id": acct_dir.name,
+            "name": acct_dir.name,
+            "post_count": len(post_dirs),
+            "total_liked": total_liked,
+            "total_collected": total_collected,
+            "sample_title": sample_title,
+        })
+    return results
+
 
 class GenerateRequest(BaseModel):
     target_account_id: str = "厚来设计"
@@ -115,6 +158,11 @@ async def _run_pipeline(req: GenerateRequest) -> AsyncGenerator[str, None]:
         yield _sse_event("complete", final.model_dump(mode="json"))
     except Exception as e:
         yield _sse_event("error", {"message": f"{type(e).__name__}: {e}"})
+
+
+@app.get("/api/accounts")
+async def list_accounts():
+    return _scan_accounts()
 
 
 @app.post("/api/generate")

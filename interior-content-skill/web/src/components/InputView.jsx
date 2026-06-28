@@ -4,17 +4,30 @@ const LAYOUTS = ['一室一厅', '两室一厅', '三室两厅', '四室两厅',
 const SPACES = ['客厅', '客餐厅', '主卧', '儿童房', '书房', '厨房', '卫生间', '全屋']
 const ORIENTATIONS = ['南北通透', '东西朝向', '南向', '北向', '东向', '西向']
 
-const ACCOUNTS = [
-  { id: '厚来设计', name: '厚来设计', initial: '厚', gradient: 'from-blue-500 to-purple-500', stats: '1284 赞 · 1210 收藏', tags: '静奢老钱风', city: '北京', category: '高端私宅', available: true },
-  { id: '纯白空间', name: '纯白空间', initial: '纯', gradient: 'from-emerald-400 to-cyan-500', stats: '3.2w 粉丝', tags: '极简侘寂风', city: '上海', category: '精装改造', available: false },
-  { id: '木子设计', name: '木子设计', initial: '木', gradient: 'from-amber-400 to-orange-500', stats: '8600 粉丝', tags: '日式原木风', city: '杭州', category: '小户型收纳', available: false },
-  { id: '宅匠空间', name: '宅匠空间', initial: '宅', gradient: 'from-rose-400 to-pink-500', stats: '1.5w 粉丝', tags: '现代轻奢风', city: '深圳', category: '大平层', available: false },
-  { id: '归心设计', name: '归心设计', initial: '归', gradient: 'from-violet-400 to-indigo-500', stats: '6200 粉丝', tags: '新中式国风', city: '成都', category: '别墅庭院', available: false },
+const GRADIENTS = [
+  'from-blue-500 to-purple-500',
+  'from-emerald-400 to-cyan-500',
+  'from-amber-400 to-orange-500',
+  'from-rose-400 to-pink-500',
+  'from-violet-400 to-indigo-500',
+  'from-sky-400 to-blue-500',
+  'from-lime-400 to-green-500',
+  'from-fuchsia-400 to-purple-500',
+  'from-teal-400 to-emerald-500',
+  'from-orange-400 to-red-500',
+  'from-cyan-400 to-blue-500',
 ]
+
+function formatCount(n) {
+  if (!n) return '0'
+  if (n >= 10000) return (n / 10000).toFixed(1) + 'w'
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'k'
+  return String(n)
+}
 
 const DEFAULT_NOTES = '180㎡四室两厅，三代同堂改善住宅。客户希望有静奢老钱风的高级感，但不要酒店样板间式的冰冷；需要开放客餐厨、充足收纳、儿童活动空间，并照顾长辈日常动线。'
 
-function AccountPicker({ selected, onSelect, onOpenChange }) {
+function AccountPicker({ accounts, selected, onSelect, onOpenChange }) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const panelRef = useRef(null)
@@ -34,9 +47,9 @@ function AccountPicker({ selected, onSelect, onOpenChange }) {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [open])
 
-  const selectedAccount = ACCOUNTS.find(a => a.id === selected)
-  const filtered = ACCOUNTS.filter(a =>
-    a.name.includes(search) || a.tags.includes(search) || a.city.includes(search) || a.category.includes(search)
+  const selectedAccount = accounts.find(a => a.id === selected)
+  const filtered = accounts.filter(a =>
+    a.name.includes(search) || (a.sample_title || '').includes(search)
   )
 
   return (
@@ -50,11 +63,11 @@ function AccountPicker({ selected, onSelect, onOpenChange }) {
         {selectedAccount && (
           <>
             <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${selectedAccount.gradient} flex items-center justify-center text-white font-bold shrink-0`}>
-              {selectedAccount.initial}
+              {selectedAccount.name[0]}
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-white">{selectedAccount.name}</div>
-              <div className="text-xs text-slate-400 truncate">{selectedAccount.tags} · {selectedAccount.city}{selectedAccount.category}</div>
+              <div className="text-xs text-slate-400 truncate">{formatCount(selectedAccount.total_liked)} 赞 · {formatCount(selectedAccount.total_collected)} 收藏 · {selectedAccount.post_count} 篇笔记</div>
             </div>
           </>
         )}
@@ -78,7 +91,7 @@ function AccountPicker({ selected, onSelect, onOpenChange }) {
                 type="text"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="搜索账号、风格、城市..."
+                placeholder="搜索账号名称..."
                 className="w-full bg-white/5 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
                 autoFocus
               />
@@ -96,37 +109,31 @@ function AccountPicker({ selected, onSelect, onOpenChange }) {
                     key={account.id}
                     type="button"
                     onClick={() => {
-                      if (account.available) {
-                        onSelect(account.id)
-                        toggleOpen(false)
-                        setSearch('')
-                      }
+                      onSelect(account.id)
+                      toggleOpen(false)
+                      setSearch('')
                     }}
                     className={`flex items-center gap-3 p-3 rounded-lg text-left transition-all ${
                       selected === account.id
                         ? 'bg-blue-500/10 border border-blue-500/30'
-                        : account.available
-                          ? 'hover:bg-white/5 border border-transparent'
-                          : 'opacity-40 cursor-not-allowed border border-transparent'
+                        : 'hover:bg-white/5 border border-transparent'
                     }`}
                   >
                     <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${account.gradient} flex items-center justify-center text-white font-bold text-sm shrink-0`}>
-                      {account.initial}
+                      {account.name[0]}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm text-white flex items-center gap-2">
                         {account.name}
-                        <span className="text-[10px] text-slate-500">{account.city}</span>
+                        <span className="text-[10px] text-slate-500">{account.post_count} 篇</span>
                       </div>
-                      <div className="text-xs text-slate-400 truncate">{account.stats} · {account.tags} · {account.category}</div>
+                      <div className="text-xs text-slate-400 truncate">{formatCount(account.total_liked)} 赞 · {formatCount(account.total_collected)} 收藏{account.sample_title ? ` · ${account.sample_title}` : ''}</div>
                     </div>
-                    {selected === account.id ? (
+                    {selected === account.id && (
                       <span className="text-blue-400 shrink-0">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
                       </span>
-                    ) : !account.available ? (
-                      <span className="text-[10px] text-slate-500 bg-white/5 px-1.5 py-0.5 rounded shrink-0">即将上线</span>
-                    ) : null}
+                    )}
                   </button>
                 ))}
               </div>
@@ -135,8 +142,8 @@ function AccountPicker({ selected, onSelect, onOpenChange }) {
 
           {/* 底部统计 */}
           <div className="px-3 py-2 border-t border-white/5 text-[10px] text-slate-500 flex justify-between">
-            <span>已收录 {ACCOUNTS.length} 个对标账号</span>
-            <span>{ACCOUNTS.filter(a => a.available).length} 个可用</span>
+            <span>已收录 {accounts.length} 个对标账号</span>
+            <span>数据来自本地采集</span>
           </div>
         </div>
       )}
@@ -145,8 +152,10 @@ function AccountPicker({ selected, onSelect, onOpenChange }) {
 }
 
 export default function InputView({ onGenerate }) {
+  const [accounts, setAccounts] = useState([])
+  const [accountsLoading, setAccountsLoading] = useState(true)
   const [form, setForm] = useState({
-    target_account_id: '厚来设计',
+    target_account_id: '',
     area_sqm: 180,
     layout: '四室两厅',
     space_type: '客餐厅',
@@ -157,6 +166,23 @@ export default function InputView({ onGenerate }) {
   })
   const [loading, setLoading] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/accounts')
+      .then(r => r.json())
+      .then(data => {
+        const enriched = data.map((a, i) => ({
+          ...a,
+          gradient: GRADIENTS[i % GRADIENTS.length],
+        }))
+        setAccounts(enriched)
+        if (enriched.length > 0 && !form.target_account_id) {
+          setForm(prev => ({ ...prev, target_account_id: enriched[0].id }))
+        }
+        setAccountsLoading(false)
+      })
+      .catch(() => setAccountsLoading(false))
+  }, [])
 
   const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }))
 
@@ -185,11 +211,19 @@ export default function InputView({ onGenerate }) {
             <span className="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 text-xs flex items-center justify-center font-bold">1</span>
             对标账号
           </h2>
-          <AccountPicker
-            selected={form.target_account_id}
-            onSelect={(id) => update('target_account_id', id)}
-            onOpenChange={setPickerOpen}
-          />
+          {accountsLoading ? (
+            <div className="flex items-center gap-2 p-3 text-sm text-slate-400">
+              <span className="w-4 h-4 border-2 border-slate-500 border-t-blue-400 rounded-full animate-spin" />
+              加载账号数据...
+            </div>
+          ) : (
+            <AccountPicker
+              accounts={accounts}
+              selected={form.target_account_id}
+              onSelect={(id) => update('target_account_id', id)}
+              onOpenChange={setPickerOpen}
+            />
+          )}
         </div>
 
         {/* Step 2 */}
