@@ -91,9 +91,15 @@ http://localhost:5173
 
 > 如果项目路径里包含冒号，例如 `Beyond Prompt: Agents in Action`，不要使用 `npm run dev`；npm 会把冒号当作 PATH 分隔符，导致 `vite: command not found`。请直接使用 `./node_modules/.bin/vite`。
 
-## 临时公网演示：Cloudflare Quick Tunnel
+## 固定公网演示：ngrok dev domain
 
-如果想让评委或朋友通过公网访问本地电脑上的 demo，可以用 Cloudflare Quick Tunnel 暴露前端端口。需要保持本地电脑联网，并同时运行后端、前端和 tunnel 三个进程。
+如果想让评委或朋友通过公网访问本地电脑上的 demo，可以用 ngrok dev domain 暴露前端端口。当前固定公网地址为：
+
+```text
+https://deviation-lunacy-rack.ngrok-free.dev
+```
+
+需要保持本地电脑联网，并同时运行后端、前端和 ngrok 三个进程。
 
 ### 1. 启动后端
 
@@ -121,16 +127,16 @@ cd "/Users/kafka/Desktop/files/bussiness_test/Hackathon/Beyond Prompt: Agents in
 http://localhost:5173
 ```
 
-### 3. 启动 Quick Tunnel
+### 3. 启动 ngrok 固定域名 tunnel
 
 ```bash
-cloudflared tunnel --url http://localhost:5173
+ngrok http --domain=deviation-lunacy-rack.ngrok-free.dev 5173
 ```
 
-启动后终端会输出一个临时公网地址，例如：
+启动后终端会输出固定公网地址：
 
 ```text
-https://xxxx-xxxx-xxxx.trycloudflare.com
+https://deviation-lunacy-rack.ngrok-free.dev
 ```
 
 打开这个地址即可访问 Web demo。前端中的 `/api` 请求会继续通过 Vite proxy 转发到本地后端 `localhost:8000`。
@@ -138,7 +144,7 @@ https://xxxx-xxxx-xxxx.trycloudflare.com
 可以用下面的地址检查后端是否也通过公网打通：
 
 ```text
-https://xxxx-xxxx-xxxx.trycloudflare.com/api/health
+https://deviation-lunacy-rack.ngrok-free.dev/api/health
 ```
 
 如果返回类似下面的 JSON，说明前后端都可通过公网访问：
@@ -147,7 +153,17 @@ https://xxxx-xxxx-xxxx.trycloudflare.com/api/health
 {"status":"ok","timestamp":"..."}
 ```
 
-> 注意：Quick Tunnel 的 `*.trycloudflare.com` 地址是临时链接。电脑睡眠、断网太久或重启 `cloudflared` 后，链接可能变化；正式演示前请重新确认当前 tunnel 输出的最新公网地址。
+> 注意：这个地址是 ngrok 账号下的 dev domain，URL 可以保持不变；但本地电脑仍然必须开机联网，且后端、前端和 ngrok 进程都在运行。若 ngrok token 失效或 dev domain 被账号设置变更，需要重新登录 ngrok 后再启动。
+
+### 备用方案：Cloudflare Quick Tunnel
+
+如果不使用 ngrok，也可以临时启动 Cloudflare Quick Tunnel：
+
+```bash
+cloudflared tunnel --url http://localhost:5173
+```
+
+Cloudflare Quick Tunnel 会输出一个 `*.trycloudflare.com` 临时地址。这个地址不保证固定，电脑睡眠、断网太久或重启 `cloudflared` 后都可能变化。
 
 ## 示例数据
 
