@@ -1,11 +1,11 @@
-# AI 家装内容生成引擎 - Frontend & API Server
+# StyleDNA · AI 家装内容生成引擎 - Frontend & API Server
 
 > Beyond Prompt: Agents in Action 黑客松项目
 > 团队成员：caonan（前端）、kafka（风格分析）、A（Agent 工程）
 
 ## 项目简介
 
-多 Agent 协同的 AI 家装内容生成工具：输入户型需求 → 克隆对标账号风格 → 自动生成 3 张设计效果图 + 小红书营销文案。
+StyleDNA 是多 Agent 协同的 AI 家装内容生成工具：输入户型需求 → 克隆对标账号风格 → 自动生成 3 张设计效果图 + 小红书营销文案。
 
 ### Pipeline
 

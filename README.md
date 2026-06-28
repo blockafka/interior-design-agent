@@ -1,4 +1,4 @@
-# AI 家装内容生成引擎
+# StyleDNA · AI 家装内容生成引擎
 
 > Beyond Prompt: Agents in Action 黑客松项目  
 > 输入户型需求与对标账号，自动生成家装设计效果图和可发布的小红书营销文案。
@@ -19,7 +19,7 @@
 
 ## 核心亮点
 
-- **多 Agent Pipeline**：采集样本、风格分析、提示词生成、图片生成、文案生成分工明确。
+- **多 Agent Pipeline**：样本采集、风格分析、提示词生成、图片生成、文案生成分工明确。
 - **对标账号风格克隆**：从样本账号的历史笔记中提取视觉、构图、色彩、材质和文案表达习惯。
 - **图文一体化产出**：一次生成 3 张设计效果图，并配套小红书标题、正文和话题标签。
 - **实时过程可视化**：Web 端通过 SSE 展示每个 Agent 的执行状态和中间结果，适合现场路演。
@@ -43,7 +43,7 @@
 |---|---|
 | Web 前端 | Vite + React + Tailwind CSS，负责输入表单、Pipeline 可视化、结果展示 |
 | API 服务 | FastAPI + SSE，负责串联 Agent 并向前端推送进度 |
-| Agent 层 | analyzer / prompter / generator / copywriter 四个核心 Agent |
+| Agent 层 | collector / analyzer / prompter / generator / copywriter 五个核心 Agent |
 | LLM | OpenAI-compatible API，用于风格分析、提示词和文案生成 |
 | 生图 | OpenAI Images API 兼容接口，用于生成家装效果图 |
 | 数据契约 | Pydantic v2 Schemas，约束各 Agent 的输入输出 |
@@ -99,35 +99,14 @@ http://localhost:5173
 https://deviation-lunacy-rack.ngrok-free.dev
 ```
 
-需要保持本地电脑联网，并同时运行后端、前端和 ngrok 三个进程。
-
-### 1. 启动后端
+需要保持本地电脑联网，并同时运行后端、前端和 ngrok 三个进程。后端、前端按上面「快速启动 Web 演示」起好即可，但前端要加 `--host 0.0.0.0` 以便 tunnel 访问：
 
 ```bash
-cd "/Users/kafka/Desktop/files/bussiness_test/Hackathon/Beyond Prompt: Agents in Action/interior-design-agent/interior-content-skill"
-python -m server.main
-```
-
-后端默认运行在：
-
-```text
-http://localhost:8000
-```
-
-### 2. 启动前端
-
-```bash
-cd "/Users/kafka/Desktop/files/bussiness_test/Hackathon/Beyond Prompt: Agents in Action/interior-design-agent/interior-content-skill/web"
+cd web
 ./node_modules/.bin/vite --host 0.0.0.0
 ```
 
-前端默认运行在：
-
-```text
-http://localhost:5173
-```
-
-### 3. 启动 ngrok 固定域名 tunnel
+然后启动 ngrok 固定域名 tunnel：
 
 ```bash
 ngrok http --domain=deviation-lunacy-rack.ngrok-free.dev 5173
@@ -196,7 +175,7 @@ interior-design-agent/
     ├── server/                        # FastAPI + SSE 服务
     ├── web/                           # React 前端演示界面
     ├── core/
-    │   ├── agents/                    # 风格分析、提示词、生图、文案 Agent
+    │   ├── agents/                    # 采集、风格分析、提示词、生图、文案 Agent
     │   ├── schemas.py                 # Pydantic 数据契约
     │   └── collect_loader.py          # 本地采集样本加载
     ├── tools/                         # LLM / 生图 API 封装
