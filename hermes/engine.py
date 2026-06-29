@@ -28,6 +28,11 @@ import time
 import uuid
 from datetime import datetime
 from pathlib import Path
+try:
+    from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+    ZONEINFO_AVAILABLE = True
+except ImportError:
+    ZONEINFO_AVAILABLE = False
 
 HERMES_DIR = Path(__file__).resolve().parent
 REPO_ROOT = HERMES_DIR.parent
@@ -236,9 +241,21 @@ def cron_matches(expr: str, now: datetime) -> bool:
 
 def daemon() -> int:
     _log("daemon 启动，每分钟检查一次 cron（Ctrl+C 退出）")
+    # 时区配置：优先使用 TZ 环境变量，否则使用本地时区
+    tz = None
+    tz_env = os.getenv("TZ", "").strip()
+    if tz_env and ZONEINFO_AVAILABLE:
+        try:
+            tz = ZoneInfo(tz_env)
+            _log(f"使用时区：{tz_env}")
+        except ZoneInfoNotFoundError:
+            _log(f"警告：时区 {tz_env} 不存在，使用本地时区")
     last_minute = None
     while True:
-        now = datetime.now()
+        if tz:
+            now = datetime.now(tz=tz)
+        else:
+            now = datetime.now()
         stamp = now.strftime("%Y-%m-%d %H:%M")
         if stamp != last_minute:
             last_minute = stamp

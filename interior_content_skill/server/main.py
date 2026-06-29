@@ -51,6 +51,10 @@ app.mount("/static/generated", StaticFiles(directory=str(GENERATED_DIR)), name="
 _collect_root_env = os.getenv("COLLECT_ROOT", "").strip()
 if _collect_root_env:
     COLLECT_SAMPLE_DIR = Path(_collect_root_env).expanduser().resolve()
+    # 验证目录存在，不存在则回退到示例样本
+    if not COLLECT_SAMPLE_DIR.exists() or not COLLECT_SAMPLE_DIR.is_dir():
+        print(f"WARNING: COLLECT_ROOT path {COLLECT_SAMPLE_DIR} does not exist, falling back to sample data")
+        COLLECT_SAMPLE_DIR = SKILL_ROOT / "examples" / "collect-sample"
 else:
     COLLECT_SAMPLE_DIR = SKILL_ROOT / "examples" / "collect-sample"
 
@@ -76,7 +80,7 @@ def _scan_accounts() -> list[dict]:
                     raw = _re.sub(r"\\\\", "/", raw)
                     d = json.loads(raw)
                     try:
-                        total_liked += int(d.get("liked_count") or d.get("like_count") or 0)
+                        total_liked += int(d.get("liked_count") if d.get("liked_count") is not None else d.get("like_count") or 0)
                     except (TypeError, ValueError):
                         pass
                     try:
