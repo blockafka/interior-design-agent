@@ -18,9 +18,9 @@ from __future__ import annotations
 import asyncio
 import logging
 
-from core.constants import PLACEHOLDER_IMAGE_URL
-from core.schemas import GeneratedImages, ImagePromptBundle
-from tools.image_gen import text_to_image
+from ...constants import PLACEHOLDER_IMAGE_URL
+from ...schemas import GeneratedImages, ImagePromptBundle
+from ....tools.image_gen import text_to_image
 
 logger = logging.getLogger(__name__)
 

@@ -16,7 +16,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from core.schemas import CollectedContent, CollectedPost
+from .schemas import CollectedContent, CollectedPost
 
 _IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
 

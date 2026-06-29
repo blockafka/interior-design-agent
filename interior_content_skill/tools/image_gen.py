@@ -28,7 +28,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 GENERATED_DIR = PROJECT_ROOT / "data" / "generated"
 HTTP_PREFIX = "/static/generated"
 
-from core.constants import PLACEHOLDER_IMAGE_URL
+from ..core.constants import PLACEHOLDER_IMAGE_URL
 
 
 # ---------------------------------------------------------------

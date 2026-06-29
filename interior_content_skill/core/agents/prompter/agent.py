@@ -17,8 +17,8 @@ import json
 import logging
 import re
 
-from core.schemas import ImagePromptBundle, StyleDNA, UserRequest
-from tools.llm import chat
+from ...schemas import ImagePromptBundle, StyleDNA, UserRequest
+from ....tools.llm import chat
 
 logger = logging.getLogger(__name__)
 

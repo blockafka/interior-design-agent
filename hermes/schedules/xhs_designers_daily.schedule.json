@@ -6,7 +6,7 @@
   "model_api_role": "Use the model to select the collection mode, inspect the summary, and report anomalies. Do not expose storage_state contents to the model.",
   "command": [
     "python",
-    "hermes/skills/xhs-content-collector/scripts/xhs_full_note_collect.py",
+    "skills/xhs_content_collector/scripts/xhs_full_note_collect.py",
     "--task",
     "hermes/tasks/xhs_designers_daily.json",
     "--output",

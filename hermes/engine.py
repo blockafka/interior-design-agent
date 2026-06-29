@@ -76,7 +76,9 @@ def _resolve_token(token: str, env: dict[str, str]) -> str:
 def _fix_skill_path(token: str) -> str:
     """兼容旧 schedule：把 hermes/skills/xhs-content-collector 指到主干 skills/。"""
     return token.replace(
-        "hermes/skills/xhs-content-collector", "skills/xhs-content-collector"
+        "hermes/skills/xhs-content-collector", "skills/xhs_content_collector"
+    ).replace(
+        "skills/xhs-content-collector", "skills/xhs_content_collector"
     )
 
 

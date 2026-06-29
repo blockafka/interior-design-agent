@@ -18,12 +18,12 @@ from typing import Any
 
 from dotenv import load_dotenv
 
-from core.agents.analyzer.agent import run as analyzer_run
-from core.agents.copywriter.agent import run as copywriter_run
-from core.agents.generator.agent import run as generator_run
-from core.agents.prompter.agent import run as prompter_run
-from core.collect_loader import load_collected_content
-from core.schemas import FinalPost, UserRequest
+from ..core.agents.analyzer.agent import run as analyzer_run
+from ..core.agents.copywriter.agent import run as copywriter_run
+from ..core.agents.generator.agent import run as generator_run
+from ..core.agents.prompter.agent import run as prompter_run
+from ..core.collect_loader import load_collected_content
+from ..core.schemas import FinalPost, UserRequest
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RUNS_DIR = SKILL_ROOT / "data" / "runs"

@@ -15,8 +15,8 @@ import asyncio
 import json
 from typing import Any, Awaitable, Callable
 
-from core.schemas import CollectedContent, CollectedPost, StyleDNA
-from tools.llm import chat, chat_with_images
+from ...schemas import CollectedContent, CollectedPost, StyleDNA
+from ....tools.llm import chat, chat_with_images
 
 from ._mocks import MOCK_COPY, MOCK_VISUAL
 from ._prompts import (

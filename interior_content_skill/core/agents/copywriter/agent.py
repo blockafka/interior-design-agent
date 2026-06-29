@@ -18,8 +18,8 @@ import mimetypes
 from pathlib import Path
 from typing import Awaitable, Callable
 
-from core.schemas import CopyContent, GeneratedImages, StyleDNA, UserRequest
-from tools.llm import chat_with_images
+from ...schemas import CopyContent, GeneratedImages, StyleDNA, UserRequest
+from ....tools.llm import chat_with_images
 
 from ._mocks import MOCK_COPY
 from ._prompts import COPYWRITER_SYSTEM_PROMPT, COPYWRITER_USER_PROMPT_TEMPLATE

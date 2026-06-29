@@ -10,12 +10,12 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
-from core.agents.analyzer.agent import run as analyzer_run
-from core.agents.copywriter.agent import run as copywriter_run
-from core.agents.generator.agent import run as generator_run
-from core.agents.prompter.agent import run as prompter_run
-from core.collect_loader import load_collected_content
-from core.schemas import CollectedContent, FinalPost, UserRequest
+from .agents.analyzer.agent import run as analyzer_run
+from .agents.copywriter.agent import run as copywriter_run
+from .agents.generator.agent import run as generator_run
+from .agents.prompter.agent import run as prompter_run
+from .collect_loader import load_collected_content
+from .schemas import CollectedContent, FinalPost, UserRequest
 
 
 async def run(
