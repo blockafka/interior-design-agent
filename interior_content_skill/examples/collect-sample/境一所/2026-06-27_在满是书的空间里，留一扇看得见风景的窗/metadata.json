@@ -1,0 +1,114 @@
+{
+  "target_blogger": "境一所",
+  "target_profile_url": "https://www.xiaohongshu.com/user/profile/66f8f063000000001d03276a?xsec_token=YBWkT9E1nxEUOv2M-t_GlnSXOG6f5mtI4_g9TRQFWJBUg%3D&xsec_source=app_share&xhsshare=&shareRedId=N0hEQTM3SDpLTThGSj0wNjY0QT00PD85&apptime=1782460850&share_id=f0f8c3db13474b5ea3434d095015b5a3&share_channel=wechat",
+  "title": "在满是书的空间里，留一扇看得见风景的窗",
+  "author": "境一所｜上海",
+  "note_id": "6a3f71e50000000017028e74",
+  "note_url": "https://www.xiaohongshu.com/explore/6a3f71e50000000017028e74?xsec_token=ABgCs9MQ_LtsxLRQifHUDwjrTVb_8XjAIaOdk2hb-ZXQk=&xsec_source=pc_user",
+  "type": "normal",
+  "publish_time": "",
+  "publish_time_raw": null,
+  "collect_count": null,
+  "liked_count": null,
+  "comment_count": null,
+  "body_char_count": 280,
+  "image_count": 9,
+  "downloaded_image_count": 9,
+  "download_errors": [],
+  "images": [
+    {
+      "index": 1,
+      "url": "https://sns-webpic-qc.xhscdn.com/202606271849/6929317cee0fc3be3856d2c8a40ae787/1040g2sg321tkpb7h7u6g5pnou1hne9ra4t9hgpo!nd_dft_wlteh_webp_3",
+      "file": "C:\\Users\\AlanFu-AG\\Documents\\AI家居设计Agent\\data\\xhs_collected\\境一所\\2026-06-27_在满是书的空间里，留一扇看得见风景的窗\\images\\01.webp",
+      "bytes": 166248,
+      "contentType": "image/webp",
+      "width": 1080,
+      "height": 1439
+    },
+    {
+      "index": 2,
+      "url": "https://sns-webpic-qc.xhscdn.com/202606271849/3876b0a502733daffb6004d8728ce2ab/1040g2sg321tkpb7h7u505pnou1hne9radlvh8cg!nd_dft_wlteh_webp_3",
+      "file": "C:\\Users\\AlanFu-AG\\Documents\\AI家居设计Agent\\data\\xhs_collected\\境一所\\2026-06-27_在满是书的空间里，留一扇看得见风景的窗\\images\\02.webp",
+      "bytes": 138676,
+      "contentType": "image/webp",
+      "width": 1080,
+      "height": 1440
+    },
+    {
+      "index": 3,
+      "url": "https://sns-webpic-qc.xhscdn.com/202606271849/f17b11fce5dbb73b00c197fdb1c20ae3/1040g2sg321tkpb7h7u3g5pnou1hne9raluch9rg!nd_dft_wgth_webp_3",
+      "file": "C:\\Users\\AlanFu-AG\\Documents\\AI家居设计Agent\\data\\xhs_collected\\境一所\\2026-06-27_在满是书的空间里，留一扇看得见风景的窗\\images\\03.webp",
+      "bytes": 80360,
+      "contentType": "image/webp",
+      "width": 1086,
+      "height": 1080
+    },
+    {
+      "index": 4,
+      "url": "https://sns-webpic-qc.xhscdn.com/202606271849/3a7cb47a46f668d774d00f1ae3042d27/1040g008321tks34b7k005pnou1hne9rae8nq49g!nd_dft_wlteh_webp_3",
+      "file": "C:\\Users\\AlanFu-AG\\Documents\\AI家居设计Agent\\data\\xhs_collected\\境一所\\2026-06-27_在满是书的空间里，留一扇看得见风景的窗\\images\\04.webp",
+      "bytes": 94620,
+      "contentType": "image/webp",
+      "width": 1080,
+      "height": 1440
+    },
+    {
+      "index": 5,
+      "url": "https://sns-webpic-qc.xhscdn.com/202606271849/ffc407d2f80db13f0bf3737812d79ea8/1040g2sg321tkpb7h7u2g5pnou1hne9ranvlls40!nd_dft_wlteh_webp_3",
+      "file": "C:\\Users\\AlanFu-AG\\Documents\\AI家居设计Agent\\data\\xhs_collected\\境一所\\2026-06-27_在满是书的空间里，留一扇看得见风景的窗\\images\\05.webp",
+      "bytes": 179738,
+      "contentType": "image/webp",
+      "width": 599,
+      "height": 359
+    },
+    {
+      "index": 6,
+      "url": "https://sns-webpic-qc.xhscdn.com/202606271849/8eacd668f3169cb69e780e1723639fdd/1040g2sg321tkpb7h7u305pnou1hne9ra9mak9ao!nd_dft_wlteh_webp_3",
+      "file": "C:\\Users\\AlanFu-AG\\Documents\\AI家居设计Agent\\data\\xhs_collected\\境一所\\2026-06-27_在满是书的空间里，留一扇看得见风景的窗\\images\\06.webp",
+      "bytes": 139866,
+      "contentType": "image/webp",
+      "width": 599,
+      "height": 359
+    },
+    {
+      "index": 7,
+      "url": "https://sns-webpic-qc.xhscdn.com/202606271849/5d39da2a8b995adedd568678cbe8c2d8/1040g2sg321tkpb7h7u405pnou1hne9rah11htc8!nd_dft_wlteh_webp_3",
+      "file": "C:\\Users\\AlanFu-AG\\Documents\\AI家居设计Agent\\data\\xhs_collected\\境一所\\2026-06-27_在满是书的空间里，留一扇看得见风景的窗\\images\\07.webp",
+      "bytes": 128838,
+      "contentType": "image/webp",
+      "width": 599,
+      "height": 359
+    },
+    {
+      "index": 8,
+      "url": "https://sns-webpic-qc.xhscdn.com/202606271849/1208c7af80c22e74ba4e277db3c3d9c5/1040g2sg321tkpb7h7u4g5pnou1hne9ra86mcrn8!nd_dft_wlteh_webp_3",
+      "file": "C:\\Users\\AlanFu-AG\\Documents\\AI家居设计Agent\\data\\xhs_collected\\境一所\\2026-06-27_在满是书的空间里，留一扇看得见风景的窗\\images\\08.webp",
+      "bytes": 125930,
+      "contentType": "image/webp",
+      "width": 599,
+      "height": 359
+    },
+    {
+      "index": 9,
+      "url": "https://sns-webpic-qc.xhscdn.com/202606271849/856ef690cc6cae342b9e721fb3c6170a/1040g2sg321tkpb7h7u005pnou1hne9raarsftt8!nd_dft_wlteh_webp_3",
+      "file": "C:\\Users\\AlanFu-AG\\Documents\\AI家居设计Agent\\data\\xhs_collected\\境一所\\2026-06-27_在满是书的空间里，留一扇看得见风景的窗\\images\\09.webp",
+      "bytes": 103668,
+      "contentType": "image/webp",
+      "width": 599,
+      "height": 359
+    }
+  ],
+  "all_image_urls": [
+    "https://sns-webpic-qc.xhscdn.com/202606271849/6929317cee0fc3be3856d2c8a40ae787/1040g2sg321tkpb7h7u6g5pnou1hne9ra4t9hgpo!nd_dft_wlteh_webp_3",
+    "https://sns-webpic-qc.xhscdn.com/202606271849/3876b0a502733daffb6004d8728ce2ab/1040g2sg321tkpb7h7u505pnou1hne9radlvh8cg!nd_dft_wlteh_webp_3",
+    "https://sns-webpic-qc.xhscdn.com/202606271849/f17b11fce5dbb73b00c197fdb1c20ae3/1040g2sg321tkpb7h7u3g5pnou1hne9raluch9rg!nd_dft_wgth_webp_3",
+    "https://sns-webpic-qc.xhscdn.com/202606271849/3a7cb47a46f668d774d00f1ae3042d27/1040g008321tks34b7k005pnou1hne9rae8nq49g!nd_dft_wlteh_webp_3",
+    "https://sns-webpic-qc.xhscdn.com/202606271849/ffc407d2f80db13f0bf3737812d79ea8/1040g2sg321tkpb7h7u2g5pnou1hne9ranvlls40!nd_dft_wlteh_webp_3",
+    "https://sns-webpic-qc.xhscdn.com/202606271849/8eacd668f3169cb69e780e1723639fdd/1040g2sg321tkpb7h7u305pnou1hne9ra9mak9ao!nd_dft_wlteh_webp_3",
+    "https://sns-webpic-qc.xhscdn.com/202606271849/5d39da2a8b995adedd568678cbe8c2d8/1040g2sg321tkpb7h7u405pnou1hne9rah11htc8!nd_dft_wlteh_webp_3",
+    "https://sns-webpic-qc.xhscdn.com/202606271849/1208c7af80c22e74ba4e277db3c3d9c5/1040g2sg321tkpb7h7u4g5pnou1hne9ra86mcrn8!nd_dft_wlteh_webp_3",
+    "https://sns-webpic-qc.xhscdn.com/202606271849/856ef690cc6cae342b9e721fb3c6170a/1040g2sg321tkpb7h7u005pnou1hne9raarsftt8!nd_dft_wlteh_webp_3"
+  ],
+  "collected_at": "2026-06-27T10:50:00.338Z",
+  "batch": "designers_round2"
+}

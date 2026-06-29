@@ -1,2 +1,35 @@
 # macOS
 .DS_Store
+# ===== 凭据与环境（绝不入库）=====
+.env
+.env.local
+.env.*.local
+**/storage_state*.json
+**/*.cookie
+**/auth/
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+._*
+
+# ===== 运行时产物 =====
+hermes/runs/*
+!hermes/runs/.gitkeep
+interior-content-skill/data/generated/*
+!interior-content-skill/data/generated/.gitkeep
+interior-content-skill/data/runs/*
+!interior-content-skill/data/runs/.gitkeep
+
+# ===== 前端 =====
+node_modules/
+interior-content-skill/web/dist/
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
