@@ -46,7 +46,13 @@ GENERATED_DIR = SKILL_ROOT / "data" / "generated"
 GENERATED_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/static/generated", StaticFiles(directory=str(GENERATED_DIR)), name="generated")
 
-COLLECT_SAMPLE_DIR = SKILL_ROOT / "examples" / "collect-sample"
+# 对标账号素材根目录：优先读环境变量 COLLECT_ROOT（指向采集器实时产物，
+# 如 ../data/xhs_collected），未设置时回退到内置示例样本。
+_collect_root_env = os.getenv("COLLECT_ROOT", "").strip()
+if _collect_root_env:
+    COLLECT_SAMPLE_DIR = Path(_collect_root_env).expanduser().resolve()
+else:
+    COLLECT_SAMPLE_DIR = SKILL_ROOT / "examples" / "collect-sample"
 
 import re as _re
 
@@ -70,7 +76,7 @@ def _scan_accounts() -> list[dict]:
                     raw = _re.sub(r"\\\\", "/", raw)
                     d = json.loads(raw)
                     try:
-                        total_liked += int(d.get("liked_count") or 0)
+                        total_liked += int(d.get("liked_count") or d.get("like_count") or 0)
                     except (TypeError, ValueError):
                         pass
                     try:

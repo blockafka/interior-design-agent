@@ -61,7 +61,7 @@ def _load_post(post_dir: Path) -> CollectedPost:
         image_urls=image_urls,
         metadata={
             **metadata,
-            "likes": _to_int(metadata.get("liked_count")),
+            "likes": _to_int(metadata.get("liked_count") or metadata.get("like_count")),
             "collects": _to_int(metadata.get("collect_count")),
             "source_dir": str(post_dir),
         },

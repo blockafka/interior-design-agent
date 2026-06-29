@@ -1,4 +1,5 @@
 """统一 LLM 调用层（OpenAI 兼容协议 / 走 doubao-seed-2-0-pro-260215）
+import asyncio
 
 全队共用：analyzer / prompter / copywriter 等 Agent 通过此模块调 LLM，
 避免每个 Agent 自建 client / 各自维护 retry & auth。
@@ -66,18 +67,28 @@ async def _call(messages: list[dict], model: str, temperature: float, timeout: f
         raise RuntimeError("OPENAI_API_KEY 未设置，请检查 .env")
     base_url = os.getenv("OPENAI_BASE_URL", _DEFAULT_BASE_URL).rstrip("/")
 
+    max_retries = 4
     async with httpx.AsyncClient(timeout=timeout, trust_env=False) as client:
-        resp = await client.post(
-            f"{base_url}/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "model": model,
-                "messages": messages,
-                "temperature": temperature,
-            },
-        )
-        resp.raise_for_status()
-        return resp.json()["choices"][0]["message"]["content"]
+        for attempt in range(max_retries + 1):
+            resp = await client.post(
+                f"{base_url}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": model,
+                    "messages": messages,
+                    "temperature": temperature,
+                },
+            )
+            # 429 限流 / 5xx 瞬时错误：指数退避后重试
+            if resp.status_code == 429 or resp.status_code >= 500:
+                if attempt < max_retries:
+                    retry_after = resp.headers.get("retry-after")
+                    delay = float(retry_after) if retry_after and retry_after.replace(".", "").isdigit() else (1.5 * (2 ** attempt))
+                    await asyncio.sleep(min(delay, 20.0))
+                    continue
+            resp.raise_for_status()
+            return resp.json()["choices"][0]["message"]["content"]
+

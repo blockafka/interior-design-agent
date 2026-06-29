@@ -1,6 +1,6 @@
 # interior-content-skill
 
-家装内容生成的非采集链路。可作为 Claude Code Skill 复制到 `~/.claude/skills/`，也可直接在本仓库内开发运行。
+家装内容生成的非采集链路。可作厚 Claude Code Skill 复制到 `~/.claude/skills/`，也可直接在本仓库内开发运行。
 
 ```text
 collector 输出目录
