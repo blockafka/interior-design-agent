@@ -47,13 +47,15 @@
 | LLM | OpenAI-compatible API，用于风格分析、提示词和文案生成 |
 | 生图 | OpenAI Images API 兼容接口，用于生成家装效果图 |
 | 数据契约 | Pydantic v2 Schemas，约束各 Agent 的输入输出 |
+| **Hermes 调度引擎** | 轻量 cron 调度器，支持定时执行采集任务和内容生成任务 |
+| **小红书采集技能** | 基于 Playwright 的小红书内容自动采集，支持批量抓取对标账号的历史笔记 |
 
 ## 快速启动 Web 演示
 
 进入核心项目目录：
 
 ```bash
-cd interior-content-skill
+cd interior_content_skill
 ```
 
 安装依赖：
@@ -170,23 +172,68 @@ examples/collect-sample/<账号>/
 ```text
 interior-design-agent/
 ├── README.md                         # 仓库入口，面向黑客松评委
-├── docs/images/main-page.png         # Web 演示首页截图
-└── interior-content-skill/            # 核心 Agent Pipeline
-    ├── server/                        # FastAPI + SSE 服务
-    ├── web/                           # React 前端演示界面
-    ├── core/
-    │   ├── agents/                    # 采集、风格分析、提示词、生图、文案 Agent
-    │   ├── schemas.py                 # Pydantic 数据契约
-    │   └── collect_loader.py          # 本地采集样本加载
-    ├── tools/                         # LLM / 生图 API 封装
-    ├── examples/collect-sample/       # 对标账号样本数据
-    └── README.md                      # 核心链路开发与运行说明
+├── docs/                             # 项目文档与架构说明
+├── config/                           # 全局配置文件
+├── hermes/                           # Hermes 轻量任务调度引擎，支持 cron 定时任务
+│   ├── engine.py                     # 调度核心
+│   ├── schedules/                    # 定时任务配置
+│   ├── tasks/                        # 任务定义
+│   └── runs/                         # 任务运行日志
+├── interior_content_skill/           # 核心 Agent Pipeline（原 interior-content-skill，下划线命名适配Python导入）
+│   ├── server/                        # FastAPI + SSE 服务
+│   ├── web/                           # React 前端演示界面
+│   ├── core/
+│   │   ├── agents/                    # 采集、风格分析、提示词、生图、文案 Agent
+│   │   ├── schemas.py                 # Pydantic 数据契约
+│   │   └── collect_loader.py          # 本地采集样本加载
+│   ├── tools/                         # LLM / 生图 API 封装
+│   ├── examples/collect-sample/       # 对标账号样本数据
+│   └── README.md                      # 核心链路开发与运行说明
+└── skills/
+    └── xhs_content_collector/        # 小红书内容自动采集技能，支持批量抓取账号笔记
+        ├── scripts/                   # 采集脚本
+        └── SKILL.md                   # 采集技能使用说明
 ```
+
+## 自动化采集与调度
+
+### 小红书内容采集
+批量采集对标账号的历史笔记：
+
+```bash
+# 配置小红书登录态
+cp skills/xhs_content_collector/.env.example .env
+# 编辑 .env，填入 XHS_STORAGE_STATE_PATH（浏览器登录后导出的 storage state 文件路径）
+
+# 运行采集脚本
+python -m skills.xhs_content_collector.scripts.xhs_full_note_collect <小红书账号URL>
+```
+
+采集的内容默认保存到 `data/xhs_collected/` 目录，可直接被内容生成模块读取。
+
+### 定时调度
+使用 Hermes 引擎定时执行采集和生成任务：
+
+```bash
+# 查看所有可用调度任务
+python -m hermes.engine list
+
+# 立即执行一次任务
+python -m hermes.engine run xhs-designers-daily --dry-run  # 试运行，不实际执行
+python -m hermes.engine run xhs-designers-daily
+
+# 启动常驻调度进程，按 cron 配置自动执行
+python -m hermes.engine daemon
+```
+
+可通过 `TZ` 环境变量指定调度时区，例如 `TZ="Asia/Shanghai" python -m hermes.engine daemon`。
 
 ## 更多文档
 
-- [核心 Agent Pipeline 说明](interior-content-skill/README.md)
-- [Web 前端与 API Server 说明](interior-content-skill/web/README.md)
+- [核心 Agent Pipeline 说明](interior_content_skill/README.md)
+- [Web 前端与 API Server 说明](interior_content_skill/web/README.md)
+- [Hermes 调度引擎架构说明](docs/ARCHITECTURE.md)
+- [小红书采集技能使用说明](skills/xhs_content_collector/SKILL.md)
 
 ## 当前状态
 
